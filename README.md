@@ -1,16 +1,41 @@
-# indoor_crowded_regions
+# indoor_crowded_regions_frontend
 
-A new Flutter project.
+## Project Overview
+This is the frontend for the Indoor Crowded Regions application, built using Flutter.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+To set up and run the project locally, follow these steps:
 
-A few resources to get you started if this is your first Flutter project:
+Clone the repository:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+```
+git clone https://github.com/SW8-Indoor-Crowded-Regions/Frontend.git
+cd indoor_crowded_regions_frontend
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Install dependencies:
+
+```
+flutter pub get
+```
+
+Run the application (terminal):
+```
+flutter run
+```
+
+Run the application (vscode):
+
+1. Go to main.dart
+2. Press f5
+
+
+## Requirements
+- Flutter SDK (latest stable version recommended)
+
+- Dart SDK
+
+- Android Studio (for Android development)
+
+- Xcode (for iOS development, if applicable)
