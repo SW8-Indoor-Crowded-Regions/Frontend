@@ -20,6 +20,16 @@ Install dependencies:
 flutter pub get
 ```
 
+Create platform build:
+```
+flutter create .
+```
+or
+```
+flutter create --platforms=android .
+```
+
+
 Run the application (terminal):
 ```
 flutter run
