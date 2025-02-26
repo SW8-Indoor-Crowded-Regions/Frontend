@@ -28,11 +28,36 @@ class _HomeScreenState extends State<HomeScreen> {
         leading: BurgerMenu(scaffoldKey: scaffoldKey),
       ),
       drawer: Drawer(
-        child: ListView(
-          children: const <Widget>[
-            ListTile(
-              leading: Icon(Icons.bathroom),
-              title: Text('Bathrooms'),
+        child: Column(
+          children: [
+            Expanded(
+              child: Center(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: const <Widget>[
+                    ListTile(
+                      leading: Icon(Icons.wc_rounded),
+                      title: Text('Bathrooms'),
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.shopping_cart_outlined),
+                      title: Text('Shops'),
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.food_bank_outlined),
+                      title: Text('Food'),
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.location_on_outlined),
+                      title: Text('Highlights'),
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.web),
+                      title: Text('Website'),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
