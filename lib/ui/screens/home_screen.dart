@@ -19,12 +19,13 @@ class _HomeScreenState extends State<HomeScreen> {
   Location location = Location();
   late bool _serviceEnabled = false;
   late PermissionStatus _permissionGranted;
-  late LocationData _locationData;
+  LocationData? _locationData;
   
   @override
   void initState() {
     initLocation();
     super.initState();
+    log("Initializing location...");
   }
 
   initLocation() async {
@@ -99,13 +100,28 @@ class _HomeScreenState extends State<HomeScreen> {
             options: MapOptions(
               initialCenter: LatLng(55.68884226230179, 12.578320553437063),
               initialZoom: 17.5,
-              initialCameraFit: CameraFit.bounds(bounds: LatLngBounds(LatLng(55.68992854306175, 12.57675517781487), LatLng(55.68782999161226, 12.579716336561596))),
-              cameraConstraint: CameraConstraint.contain(bounds: LatLngBounds(LatLng(55.68992854306175, 12.57675517781487), LatLng(55.68782999161226, 12.579716336561596)))
             ),
             children: [
               TileLayer(
                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                   userAgentPackageName: 'com.example.app',
+              ),
+              if (_locationData != null && _locationData!.latitude != null && _locationData!.longitude != null)
+              MarkerLayer(
+                markers: [
+                    Marker(
+                      point: LatLng(_locationData!.latitude!, _locationData!.longitude!),
+                      width: 30,
+                      height: 30,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.blue,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ],
           )
