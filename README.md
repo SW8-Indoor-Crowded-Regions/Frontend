@@ -49,3 +49,6 @@ Run the application (vscode):
 - Android Studio (for Android development)
 
 - Xcode (for iOS development, if applicable)
+
+## Bounding box for STM
+- 12.576953 55.68838827 12.57972968 55.689119
