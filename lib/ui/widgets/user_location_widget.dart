@@ -7,9 +7,13 @@ import 'package:latlong2/latlong.dart';
 
 class UserLocationWidget extends StatefulWidget {
   final MapController mapController;
+  bool hasAlteredMap;
+  UserLocationWidget({super.key, required this.mapController, this.hasAlteredMap = false});
 
-  const UserLocationWidget({super.key, required this.mapController});
-
+  void updateAlteredMap(bool value) {
+    hasAlteredMap = value;
+  }
+  
   @override
   State<UserLocationWidget> createState() => _UserLocationWidgetState();
 }
@@ -19,6 +23,7 @@ class _UserLocationWidgetState extends State<UserLocationWidget> {
   bool _serviceEnabled = false;
   PermissionStatus _permissionGranted = PermissionStatus.denied;
   LocationData? _locationData;
+  bool hasAlteredMap = false;
 
   @override
   void initState() {
@@ -49,6 +54,30 @@ class _UserLocationWidgetState extends State<UserLocationWidget> {
         );
       });
     }
+
+    updateLocation();
+  }
+
+  double calculateDistance(double oldLat, double oldLong, double newLat, double newLong) {
+    const Distance distance = Distance();
+    return distance.as(LengthUnit.Meter, LatLng(oldLat, oldLong), LatLng(newLat, newLong));
+  }
+
+  void updateLocation() {
+    print("updating location");
+    location.onLocationChanged.listen((LocationData newLocation) {
+      if (_locationData == null ||
+        calculateDistance(_locationData!.latitude!, _locationData!.longitude!,
+                          newLocation.latitude!, newLocation.longitude!) > 1) {
+        setState(() {
+          _locationData = newLocation;
+          print(widget.hasAlteredMap);
+          if (!widget.hasAlteredMap) {
+            widget.mapController.move(LatLng(newLocation.latitude!, newLocation.longitude!), widget.mapController.camera.zoom);
+          }
+        });
+      }
+    });
   }
 
   @override
