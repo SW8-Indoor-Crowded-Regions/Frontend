@@ -21,6 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late bool _serviceEnabled = false;
   late PermissionStatus _permissionGranted;
   late LocationData _locationData;
+  double _currentZoom = 18.0;
 
   @override
   void initState() {
@@ -100,9 +101,8 @@ class _HomeScreenState extends State<HomeScreen> {
             mapController: mapController,
             options: MapOptions(
               initialCenter: const LatLng(55.68875, 12.5783),
-              initialZoom: 18,
               minZoom: 17.5,
-              maxZoom: 20.5,
+              maxZoom: 20,
               initialCameraFit: CameraFit.bounds(
                 bounds: LatLngBounds(
                   const LatLng(55.68838827, 12.576953),
@@ -110,6 +110,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 padding: const EdgeInsets.all(20),
               ),
+              onPositionChanged: (position, hasGesture) {
+                setState(() {
+                  _currentZoom = position.zoom;
+                });
+              },
             ),
             children: [
               TileLayer(
@@ -119,19 +124,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 fallbackUrl: 'assets/tiles/no_tile.png',
               ),
               MarkerLayer(
-                markers: rooms.map((room) {
+                markers: rooms.where((room) => _currentZoom >= room.minZoomThreshold).map((room) {
                   return Marker(
                     point: room.location,
                     width: 40,
                     height: 40,
                     child: GestureDetector(
-                      behavior: HitTestBehavior.opaque, // Ensures the tap is detected
+                      behavior: HitTestBehavior.opaque,
                       onTap: () {
                         showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
                             title: Text(room.name),
-                            content: const Text("Room details will be displayed here."),
+                            content: Text(room.description),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context),
@@ -141,12 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         );
                       },
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Icon(room.icon, size: 20, color: room.color),
-                        ],
-                      ),
+                      child: Icon(room.icon, size: _currentZoom * 1.75, color: room.color),
                     ),
                   );
                 }).toList(),
