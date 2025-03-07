@@ -13,7 +13,7 @@ class UserLocationWidget extends StatefulWidget {
   void updateAlteredMap(bool value) {
     hasAlteredMap = value;
   }
-  
+
   @override
   State<UserLocationWidget> createState() => _UserLocationWidgetState();
 }
@@ -32,6 +32,7 @@ class _UserLocationWidgetState extends State<UserLocationWidget> {
   }
 
   Future<void> initLocation() async {
+    await Future.delayed(const Duration(seconds: 1));
     _serviceEnabled = await location.serviceEnabled();
     if (!_serviceEnabled) {
       _serviceEnabled = await location.requestService();
@@ -47,7 +48,6 @@ class _UserLocationWidgetState extends State<UserLocationWidget> {
     _locationData = await location.getLocation();
     if (mounted) {
       setState(() {
-        log("User location: ${_locationData.toString()}");
         widget.mapController.move(
           LatLng(_locationData?.latitude ?? 0, _locationData?.longitude ?? 0),
           16,
@@ -64,14 +64,12 @@ class _UserLocationWidgetState extends State<UserLocationWidget> {
   }
 
   void updateLocation() {
-    print("updating location");
     location.onLocationChanged.listen((LocationData newLocation) {
       if (_locationData == null ||
         calculateDistance(_locationData!.latitude!, _locationData!.longitude!,
                           newLocation.latitude!, newLocation.longitude!) > 1) {
         setState(() {
           _locationData = newLocation;
-          print(widget.hasAlteredMap);
           if (!widget.hasAlteredMap) {
             widget.mapController.move(LatLng(newLocation.latitude!, newLocation.longitude!), widget.mapController.camera.zoom);
           }
