@@ -50,5 +50,28 @@ Run the application (vscode):
 
 - Xcode (for iOS development, if applicable)
 
+## ❄️ NixOS ❄️
+On NixOS you need to enter the flake using: 
+```nix
+nix develop
+```
+and create an emulator:
+```bash
+avdmanager create avd --force --name phone --package 'system-images;android-32;google_apis;x86_64'
+emulator -avd phone -skin 720x1280 --gpu host
+```
+If it is first time building, then run: 
+```bash
+flutter create .
+```
+If not, then simply use run the emulator using 
+```bash
+flutter emulators --launch phone
+```
+And then run the application, while the emulator is running:
+```bash
+flutter run -d sdk
+```
+
 ## Bounding box for STM
 - 12.576953 55.68838827 12.57972968 55.689119
