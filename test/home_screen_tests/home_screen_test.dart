@@ -49,6 +49,6 @@ void main() {
     await tester.pumpAndSettle();
 
     // Expect that the AlertDialog is shown with the title "Room 101".
-    expect(find.text("Room 102"), findsOneWidget);
+    expect(find.text("Room 101"), findsOneWidget);
   });
 }
