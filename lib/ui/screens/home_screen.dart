@@ -21,7 +21,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void onMapEvent(MapEvent event) {
     if (event is MapEventMove) {
-      print("MAP EVENT OCCURRED");
       setState(() {
         hasAlteredMap = true;
       });
@@ -36,13 +35,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print(hasAlteredMap);
     return Scaffold(
       key: scaffoldKey,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        leading: BurgerMenu(scaffoldKey: scaffoldKey),
-      ),
       drawer: Drawer(
         child: Column(
           children: [
@@ -100,8 +94,13 @@ class _HomeScreenState extends State<HomeScreen> {
               userLocationWidget,
             ],
           ),
+          Positioned(
+            top: 40,
+            left: 16,
+            child: BurgerMenu(scaffoldKey: scaffoldKey),
+          ),
         ],
-      ),
+      ),        
     );
   }
 }
