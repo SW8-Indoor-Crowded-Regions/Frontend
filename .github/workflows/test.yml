@@ -1,10 +1,10 @@
-name: Flutter CI
+name: Flutter tests
 
 on:
   push:
-    branches: [main]
+    branches: [main, test, dev]
   pull_request:
-    branches: [main]
+    types: [opened, synchronize, reopened]
 
 jobs:
   flutter_test:
