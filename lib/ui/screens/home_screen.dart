@@ -52,6 +52,13 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  @visibleForTesting
+  void setZoom(double zoom) {
+    setState(() {
+      _currentZoom = zoom;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
