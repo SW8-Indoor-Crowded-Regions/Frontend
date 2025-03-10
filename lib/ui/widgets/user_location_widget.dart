@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -8,16 +7,10 @@ import 'dart:math' as math;
 
 class UserLocationWidget extends StatefulWidget {
   final MapController mapController;
-  bool hasAlteredMap;
   UserLocationWidget({
     super.key, 
-    required this.mapController, 
-    this.hasAlteredMap = false, 
+    required this.mapController,
   });
-
-  void updateAlteredMap(bool value) {
-    hasAlteredMap = value;
-  }
 
   @override
   State<UserLocationWidget> createState() => UserLocationWidgetState();
@@ -49,6 +42,10 @@ class UserLocationWidgetState extends State<UserLocationWidget> {
   void dispose() {
     _locationSubscription?.cancel();
     super.dispose();
+  }
+
+  void updateAlteredMap(bool value) {
+    hasAlteredMap = value;
   }
 
   Future<void> initLocation() async {
@@ -100,7 +97,7 @@ class UserLocationWidgetState extends State<UserLocationWidget> {
         double adjustedLat = newLocation.latitude! + latOffset;
         double adjustedLong = newLocation.longitude! + longOffset;
 
-        if (!widget.hasAlteredMap) {
+        if (!hasAlteredMap) {
           widget.mapController.move(
             LatLng(adjustedLat, adjustedLong),
             widget.mapController.camera.zoom,

@@ -17,7 +17,7 @@ void main() {
     // Access the HomeScreen state and update the zoom level.
     final homeScreenState = tester.state(find.byType(HomeScreen)) as dynamic;
     homeScreenState.setZoom(19.0);
-    await tester.pump(Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 200));
     await tester.pumpAndSettle();
 
     // Instead of searching for a Room (data model), we check for the rendered icon.

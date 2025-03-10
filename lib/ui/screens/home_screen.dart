@@ -1,11 +1,9 @@
-import 'dart:developer';
 import '../widgets/burger_menu.dart';
 import '../widgets/user_location_widget.dart';
 import '../widgets/burger_drawer.dart';
 import '../widgets/room.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:location/location.dart';
 import 'package:latlong2/latlong.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -50,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
             options: MapOptions(
               onMapEvent: (MapEvent event) {
                 if (event is MapEventMoveStart) {
-                  userLocationWidget.updateAlteredMap(true);
+                  userLocationKey.currentState?.updateAlteredMap(true);
                 }
               },
               initialCenter: const LatLng(55.68875, 12.5783),
@@ -123,7 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: IconButton(
                 icon: const Icon(Icons.my_location, size: 45, color: Colors.white),
                 onPressed: () {
-                  userLocationWidget.updateAlteredMap(false);
+                  userLocationKey.currentState?.updateAlteredMap(false);
                   userLocationKey.currentState?.recenterLocation();
                 },
               ),
