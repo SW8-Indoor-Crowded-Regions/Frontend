@@ -73,4 +73,5 @@ And then run the application, while the emulator is running:
 flutter run -d sdk
 ```
 
-
+## Bounding box for STM
+- 12.576953 55.68838827 12.57972968 55.689119
