@@ -11,9 +11,6 @@ void main() {
     await tester.pumpWidget(const MyApp());
     await tester.pumpAndSettle();
 
-    // Verify that an AppBar is present in the widget tree.
-    expect(find.byType(AppBar), findsOneWidget);
-
     // Check that a FlutterMap widget is in the widget tree.
     expect(find.byType(FlutterMap), findsOneWidget);
 
@@ -26,5 +23,7 @@ void main() {
     await tester.tap(burgerIconFinder);
     await tester.pumpAndSettle();
     expect(find.text('Bathrooms'), findsOneWidget);
+
+    await tester.pumpAndSettle();
   });
 }

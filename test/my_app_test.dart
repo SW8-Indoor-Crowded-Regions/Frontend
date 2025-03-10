@@ -24,5 +24,6 @@ void main() {
 
     // Verify that HomeScreen is set as the home widget.
     expect(find.byType(HomeScreen), findsOneWidget);
+    await tester.pumpAndSettle();
   });
 }

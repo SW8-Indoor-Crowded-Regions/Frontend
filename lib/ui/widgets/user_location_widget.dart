@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:location/location.dart';
@@ -23,12 +24,14 @@ class UserLocationWidget extends StatefulWidget {
 }
 
 class UserLocationWidgetState extends State<UserLocationWidget> {
+  StreamSubscription<LocationData>? _locationSubscription;
   Location location = Location();
   bool _serviceEnabled = false;
   PermissionStatus _permissionGranted = PermissionStatus.denied;
   LocationData? _locationData;
   bool hasAlteredMap = false;
   double heading = 0.0;
+  //values below are used for having SMK mocked location as campus
   double smkLat = 55.68875;
   double smkLong = 12.5783;
   double ourLat = 55.6509822;
@@ -42,8 +45,14 @@ class UserLocationWidgetState extends State<UserLocationWidget> {
     initLocation();
   }
 
+  @override
+  void dispose() {
+    _locationSubscription?.cancel();
+    super.dispose();
+  }
+
   Future<void> initLocation() async {
-    await Future.delayed(const Duration(seconds: 1));
+    await Future.delayed(const Duration(milliseconds: 200));
     _serviceEnabled = await location.serviceEnabled();
     if (!_serviceEnabled) {
       _serviceEnabled = await location.requestService();
@@ -76,7 +85,8 @@ class UserLocationWidgetState extends State<UserLocationWidget> {
   }
 
   void updateLocation() {
-    location.onLocationChanged.listen((LocationData newLocation) {
+    _locationSubscription?.cancel();
+    _locationSubscription = location.onLocationChanged.listen((LocationData newLocation) {
       if (newLocation.heading != null) {
         setState(() {
           heading = newLocation.heading!;
