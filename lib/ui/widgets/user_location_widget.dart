@@ -8,17 +8,21 @@ import 'dart:math' as math;
 class UserLocationWidget extends StatefulWidget {
   final MapController mapController;
   bool hasAlteredMap;
-  UserLocationWidget({super.key, required this.mapController, this.hasAlteredMap = false});
+  UserLocationWidget({
+    super.key, 
+    required this.mapController, 
+    this.hasAlteredMap = false, 
+  });
 
   void updateAlteredMap(bool value) {
     hasAlteredMap = value;
   }
 
   @override
-  State<UserLocationWidget> createState() => _UserLocationWidgetState();
+  State<UserLocationWidget> createState() => UserLocationWidgetState();
 }
 
-class _UserLocationWidgetState extends State<UserLocationWidget> {
+class UserLocationWidgetState extends State<UserLocationWidget> {
   Location location = Location();
   bool _serviceEnabled = false;
   PermissionStatus _permissionGranted = PermissionStatus.denied;
@@ -50,8 +54,7 @@ class _UserLocationWidgetState extends State<UserLocationWidget> {
     if (mounted) {
       setState(() {
         widget.mapController.move(
-          LatLng(_locationData?.latitude ?? 0, _locationData?.longitude ?? 0),
-          16,
+          LatLng(_locationData?.latitude ?? 0, _locationData?.longitude ?? 0), 16,
         );
       });
     }
@@ -74,15 +77,22 @@ class _UserLocationWidgetState extends State<UserLocationWidget> {
       if (_locationData == null ||
         calculateDistance(_locationData!.latitude!, _locationData!.longitude!,
                           newLocation.latitude!, newLocation.longitude!) > 1) {
-        setState(() {
-          _locationData = newLocation;
-          if (!widget.hasAlteredMap) {
-            widget.mapController.move(LatLng(newLocation.latitude!, newLocation.longitude!), widget.mapController.camera.zoom);
-          }
-        });
+        _locationData = newLocation;
+        if (!widget.hasAlteredMap) {
+          widget.mapController.move(LatLng(newLocation.latitude!, newLocation.longitude!), widget.mapController.camera.zoom);
+        }
       }
     });
   }
+
+  void recenterLocation() {
+  if (_locationData != null) {
+    widget.mapController.move(
+      LatLng(_locationData!.latitude!, _locationData!.longitude!), 
+      widget.mapController.camera.zoom,
+    );
+  }
+}
 
   @override
   Widget build(BuildContext context) {

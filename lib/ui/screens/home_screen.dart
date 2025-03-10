@@ -1,9 +1,8 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import '../widgets/burger_menu.dart';
 import '../widgets/user_location_widget.dart';
+import '../widgets/burger_drawer.dart';
 import 'package:latlong2/latlong.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -15,63 +14,24 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey<UserLocationWidgetState> userLocationKey = GlobalKey<UserLocationWidgetState>();
   MapController mapController = MapController();
   late UserLocationWidget userLocationWidget;
-  bool hasAlteredMap = false;
-
-  void onMapEvent(MapEvent event) {
-    if (event is MapEventMove) {
-      setState(() {
-        hasAlteredMap = true;
-      });
-    }
-  }
 
   @override
   void initState() {
     super.initState();
-    userLocationWidget = UserLocationWidget(mapController: mapController);
+    userLocationWidget = UserLocationWidget(
+      key: userLocationKey,
+      mapController: mapController, 
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
-      drawer: Drawer(
-        child: Column(
-          children: [
-            Expanded(
-              child: Center(
-                child: ListView(
-                  shrinkWrap: true,
-                  children: const <Widget>[
-                    ListTile(
-                      leading: Icon(Icons.wc_rounded),
-                      title: Text('Bathrooms'),
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.shopping_cart_outlined),
-                      title: Text('Shops'),
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.food_bank_outlined),
-                      title: Text('Food'),
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.location_on_outlined),
-                      title: Text('Highlights'),
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.web),
-                      title: Text('Website'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+      drawer: const BurgerDrawer(),
       body: Stack(
         children: [
           FlutterMap(
@@ -81,7 +41,6 @@ class _HomeScreenState extends State<HomeScreen> {
               initialZoom: 17.5,
               onMapEvent: (MapEvent event) {
                 if (event is MapEventMoveStart) {
-                  print("User moved the map!");
                   userLocationWidget.updateAlteredMap(true);
                 }
               },
@@ -98,6 +57,23 @@ class _HomeScreenState extends State<HomeScreen> {
             top: 40,
             left: 16,
             child: BurgerMenu(scaffoldKey: scaffoldKey),
+          ),
+          Positioned(
+            bottom: 40, 
+            right: 16, 
+            child: Container(
+              decoration: ShapeDecoration(
+                shape: const CircleBorder(),
+                color: Colors.black.withValues(alpha: 0.3),
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.my_location, size: 45, color: Colors.white),
+                onPressed: () {
+                  userLocationWidget.updateAlteredMap(false);
+                  userLocationKey.currentState?.recenterLocation();
+                },
+              ),
+            )
           ),
         ],
       ),        
