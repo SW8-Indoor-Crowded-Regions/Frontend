@@ -1,10 +1,9 @@
-import '../widgets/room.dart';
 import '../widgets/burger_menu.dart';
-
-import 'dart:developer';
+import '../widgets/user_location_widget.dart';
+import '../widgets/burger_drawer.dart';
+import '../widgets/room.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:location/location.dart';
 import 'package:latlong2/latlong.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -16,40 +15,18 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey<UserLocationWidgetState> userLocationKey = GlobalKey<UserLocationWidgetState>();
   MapController mapController = MapController();
-  Location location = Location();
-  late bool _serviceEnabled = false;
-  late PermissionStatus _permissionGranted;
-  late LocationData _locationData;
+  late UserLocationWidget userLocationWidget;
   double _currentZoom = 18.0;
 
   @override
   void initState() {
-    initLocation();
     super.initState();
-  }
-
-  initLocation() async {
-    _serviceEnabled = await location.serviceEnabled();
-    if (!_serviceEnabled) {
-      _serviceEnabled = await location.requestService();
-      if (!_serviceEnabled) {
-        return;
-      }
-    }
-    _permissionGranted = await location.hasPermission();
-    if (_permissionGranted == PermissionStatus.denied) {
-      _permissionGranted = await location.requestPermission();
-      if (_permissionGranted != PermissionStatus.granted) {
-        return;
-      }
-    }
-
-    _locationData = await location.getLocation();
-    setState(() {
-      log(_locationData.toString());
-      // mapController.move(LatLng(_locationData?.latitude ?? 0, _locationData?.longitude ?? 0), 16);
-    });
+    userLocationWidget = UserLocationWidget(
+      key: userLocationKey,
+      mapController: mapController, 
+    );
   }
 
   @visibleForTesting
@@ -63,50 +40,17 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        leading: BurgerMenu(scaffoldKey: scaffoldKey),
-      ),
-      drawer: Drawer(
-        child: Column(
-          children: [
-            Expanded(
-              child: Center(
-                child: ListView(
-                  shrinkWrap: true,
-                  children: const <Widget>[
-                    ListTile(
-                      leading: Icon(Icons.wc_rounded),
-                      title: Text('Bathrooms'),
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.shopping_cart_outlined),
-                      title: Text('Shops'),
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.food_bank_outlined),
-                      title: Text('Food'),
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.location_on_outlined),
-                      title: Text('Highlights'),
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.web),
-                      title: Text('Website'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+      drawer: const BurgerDrawer(),
       body: Stack(
         children: [
           FlutterMap(
             mapController: mapController,
             options: MapOptions(
+              onMapEvent: (MapEvent event) {
+                if (event is MapEventMoveStart) {
+                  userLocationKey.currentState?.updateAlteredMap(true);
+                }
+              },
               initialCenter: const LatLng(55.68875, 12.5783),
               minZoom: 17.5,
               maxZoom: 20,
@@ -158,10 +102,33 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                 }).toList(),
               ),
+              userLocationWidget,
             ],
           ),
+          Positioned(
+            top: 40,
+            left: 16,
+            child: BurgerMenu(scaffoldKey: scaffoldKey),
+          ),
+          Positioned(
+            bottom: 40, 
+            right: 16, 
+            child: Container(
+              decoration: ShapeDecoration(
+                shape: const CircleBorder(),
+                color: Colors.black.withValues(alpha: 0.3),
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.my_location, size: 45, color: Colors.white),
+                onPressed: () {
+                  userLocationKey.currentState?.updateAlteredMap(false);
+                  userLocationKey.currentState?.recenterLocation();
+                },
+              ),
+            )
+          ),
         ],
-      ),
+      ),        
     );
   }
 }
