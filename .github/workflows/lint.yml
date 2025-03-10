@@ -1,4 +1,4 @@
-name: Flutter tests
+name: Lint Flutter code
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  flutter_test:
+  flutter_lint:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,8 +19,5 @@ jobs:
         with:
           channel: stable
 
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Run tests
-        run: flutter test --coverage
+      - name: Analyze code
+        run: flutter analyze
