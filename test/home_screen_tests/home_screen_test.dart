@@ -25,7 +25,6 @@ void main() {
     expect(find.byIcon(Icons.place), findsWidgets);
   });
 
-
   testWidgets('Renders SMK map and finds room 101', (WidgetTester tester) async {
     // Build the MyApp widget and wait for asynchronous operations.
     await tester.pumpWidget(const MyApp());
@@ -50,5 +49,19 @@ void main() {
 
     // Expect that the AlertDialog is shown with the title "Room 101".
     expect(find.text("Room 101"), findsOneWidget);
+  });
+
+  testWidgets('Renders SMK map and does not find room 101 nor any Icons for rooms', (WidgetTester tester) async {
+    // Build the MyApp widget and wait for asynchronous operations.
+    await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
+
+    // Verify that the AppBar and FlutterMap widgets are present.
+    expect(find.byType(AppBar), findsOneWidget);
+    expect(find.byType(FlutterMap), findsOneWidget);
+
+    // Check that room markers (which use Icons.place) are not rendered.
+    final markerIconFinder = find.byIcon(Icons.place);
+    expect(markerIconFinder, findsNothing);
   });
 }
