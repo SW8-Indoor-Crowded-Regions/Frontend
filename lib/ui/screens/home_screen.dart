@@ -54,8 +54,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
               },
               initialCenter: const LatLng(55.68875, 12.5783),
-              //minZoom: 17.5,
-              //maxZoom: 20,
+              minZoom: 17.5,
+              maxZoom: 20,
               initialCameraFit: CameraFit.bounds(
                 bounds: LatLngBounds(
                   const LatLng(55.68838827, 12.576953),
