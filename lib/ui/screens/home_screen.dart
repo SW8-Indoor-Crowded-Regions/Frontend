@@ -1,5 +1,9 @@
+import '../widgets/path/edge_segment.dart';
 import '../widgets/room.dart';
 import '../widgets/burger_menu.dart';
+import '../../data/models/graph_models.dart';
+import '../widgets/path/line_path.dart';
+import '../../utils/path/load_graph_data.dart';
 
 import 'dart:developer';
 import 'package:flutter/material.dart';
@@ -22,14 +26,22 @@ class _HomeScreenState extends State<HomeScreen> {
   late PermissionStatus _permissionGranted;
   late LocationData _locationData;
   double _currentZoom = 18.0;
+  List<EdgeModel> _edges = [];
+  Map<int, NodeModel> _nodeMap = {};
 
   @override
   void initState() {
-    initLocation();
     super.initState();
+    initLocation();
+    loadGraphData().then((graphData) {
+      setState(() {
+        _edges = graphData['edges'];
+        _nodeMap = graphData['nodeMap'];
+      });
+    });
   }
 
-  initLocation() async {
+  Future<void> initLocation() async {
     _serviceEnabled = await location.serviceEnabled();
     if (!_serviceEnabled) {
       _serviceEnabled = await location.requestService();
@@ -48,7 +60,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _locationData = await location.getLocation();
     setState(() {
       log(_locationData.toString());
-      // mapController.move(LatLng(_locationData?.latitude ?? 0, _locationData?.longitude ?? 0), 16);
     });
   }
 
@@ -61,6 +72,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final List<EdgeSegment> segments = createEdgeSegments(_edges, _nodeMap);
+
     return Scaffold(
       key: scaffoldKey,
       appBar: AppBar(
@@ -131,7 +144,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 fallbackUrl: 'assets/tiles/no_tile.png',
               ),
               MarkerLayer(
-                markers: rooms.where((room) => _currentZoom >= room.minZoomThreshold).map((room) {
+                markers: rooms
+                    .where((room) => _currentZoom >= room.minZoomThreshold)
+                    .map((room) {
                   return Marker(
                     point: room.location,
                     width: 40,
@@ -153,11 +168,17 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         );
                       },
-                      child: Icon(room.icon, size: _currentZoom * 1.75, color: room.color),
+                      child: Icon(
+                        room.icon,
+                        size: _currentZoom * 1.75,
+                        color: room.color,
+                      ),
                     ),
                   );
                 }).toList(),
               ),
+
+              if (segments.isNotEmpty) LinePath(segments: segments),
             ],
           ),
         ],
