@@ -5,7 +5,7 @@ class EdgeSegment {
   final LatLng from;
   final LatLng to;
   final int population;
-  
+
   Color get color {
     if (population <= 500) {
       return Colors.green;
