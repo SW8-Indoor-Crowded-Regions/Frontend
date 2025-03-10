@@ -1,0 +1,23 @@
+name: Lint Flutter code
+
+on:
+  push:
+    branches: [main, test, dev]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  flutter_lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Analyze code
+        run: flutter analyze
