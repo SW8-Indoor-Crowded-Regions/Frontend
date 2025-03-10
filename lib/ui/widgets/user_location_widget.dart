@@ -7,7 +7,7 @@ import 'dart:math' as math;
 
 class UserLocationWidget extends StatefulWidget {
   final MapController mapController;
-  UserLocationWidget({
+  const UserLocationWidget({
     super.key, 
     required this.mapController,
   });
