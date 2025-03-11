@@ -12,7 +12,16 @@ import 'package:location/location.dart';
 import 'package:latlong2/latlong.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  @visibleForTesting
+  final Future<Map<String, dynamic>> Function()? loadGraphDataFn;
+  @visibleForTesting
+  final bool skipUserLocation;
+  
+  const HomeScreen({
+    super.key,
+    this.loadGraphDataFn,
+    this.skipUserLocation = false,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -32,8 +41,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    initLocation();
-    loadGraphData().then((graphData) {
+    if (!widget.skipUserLocation) {
+      initLocation();
+    }
+    final fn = widget.loadGraphDataFn ?? loadGraphData;
+    fn().then((graphData) {
       setState(() {
         _edges = graphData['edges'];
         _nodeMap = graphData['nodeMap'];

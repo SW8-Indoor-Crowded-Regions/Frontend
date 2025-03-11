@@ -38,5 +38,5 @@ flutter:
     - assets/tiles/19/280462/
     - assets/tiles/19/280463/
     - assets/tiles/19/280464/
-    - mock_data/graph.json
+    - assets/mock_data/graph.json
     

@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 
 Future<Map<String, dynamic>> loadGraphData() async {
   try {
-    final String jsonString = await rootBundle.loadString('mock_data/graph.json');
+    final String jsonString = await rootBundle.loadString('assets/mock_data/graph.json');
     final Map<String, dynamic> jsonData = json.decode(jsonString);
 
     final List<dynamic> nodesJson = jsonData['nodes'] ?? [];

@@ -1,9 +1,10 @@
+import 'package:indoor_crowded_regions_frontend/my_app.dart';
+import 'package:indoor_crowded_regions_frontend/ui/screens/home_screen.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:indoor_crowded_regions_frontend/my_app.dart';
 import 'package:flutter_map/flutter_map.dart';
 
-import 'package:indoor_crowded_regions_frontend/ui/screens/home_screen.dart';
 
 void main() {
   testWidgets('Renders HomeScreen, FlutterMap and rooms when zoom level is high enough', (WidgetTester tester) async {
