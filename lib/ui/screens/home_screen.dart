@@ -31,7 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<UserLocationWidgetState> userLocationKey = GlobalKey<UserLocationWidgetState>();
   MapController mapController = MapController();
-  late UserLocationWidget userLocationWidget;
+  UserLocationWidget? userLocationWidget;
   double _currentZoom = 18.0;
   List<EdgeModel> _edges = [];
   Map<int, NodeModel> _nodeMap = {};
@@ -39,10 +39,12 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    userLocationWidget = UserLocationWidget(
-      key: userLocationKey,
-      mapController: mapController, 
-    );
+    if (!widget.skipUserLocation) {
+      userLocationWidget = UserLocationWidget(
+        key: userLocationKey,
+        mapController: mapController,
+      );
+    }
     final fn = widget.loadGraphDataFn ?? loadGraphData;
     fn().then((graphData) {
       setState(() {
@@ -135,7 +137,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
 
               if (segments.isNotEmpty) LinePath(segments: segments),
-              userLocationWidget,
+              if (userLocationWidget != null) userLocationWidget!,
             ],
           ),
           Positioned(
@@ -143,23 +145,24 @@ class _HomeScreenState extends State<HomeScreen> {
             left: 16,
             child: BurgerMenu(scaffoldKey: scaffoldKey),
           ),
-          Positioned(
-            bottom: 40, 
-            right: 16, 
-            child: Container(
-              decoration: ShapeDecoration(
-                shape: const CircleBorder(),
-                color: Colors.black.withValues(alpha: 0.3),
+          if (!widget.skipUserLocation)
+            Positioned(
+              bottom: 40,
+              right: 16,
+              child: Container(
+                decoration: ShapeDecoration(
+                  shape: const CircleBorder(),
+                  color: Colors.black.withAlpha(80),
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.my_location, size: 45, color: Colors.white),
+                  onPressed: () {
+                    userLocationKey.currentState?.updateAlteredMap(false);
+                    userLocationKey.currentState?.recenterLocation();
+                  },
+                ),
               ),
-              child: IconButton(
-                icon: const Icon(Icons.my_location, size: 45, color: Colors.white),
-                onPressed: () {
-                  userLocationKey.currentState?.updateAlteredMap(false);
-                  userLocationKey.currentState?.recenterLocation();
-                },
-              ),
-            )
-          ),
+            ),
         ],
       ),        
     );
