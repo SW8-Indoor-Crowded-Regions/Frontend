@@ -73,6 +73,6 @@ class HomeScreenTestWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Overriding the loadGraphData function in HomeScreen
-    return HomeScreen(loadGraphDataFn: loadGraphDataOverride);
+    return HomeScreen(loadGraphDataFn: loadGraphDataOverride, skipUserLocation: skipUserLocation);
   }
 }
