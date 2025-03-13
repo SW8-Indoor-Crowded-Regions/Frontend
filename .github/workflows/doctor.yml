@@ -1,4 +1,4 @@
-name: Lint Flutter code
+name: An apple a day keeps the doctor away
 
 on:
   push:
