@@ -32,6 +32,7 @@ List<Room> rooms = [
 
   // Toilets
   Room(name: "Bathroom", location: const LatLng(55.68875, 12.57818), description: "Skibidi Toilet", icon: Icons.wc, color: Colors.black),
+  Room(name: "Bathroom", location: const LatLng(55.688732, 12.57904), description: "Skibidi Toilet", icon: Icons.wc, color: Colors.black),
 
   // Restaurants
   Room(name: "Cafeteria", location: const LatLng(55.6890, 12.5783), description: "Veri gud fud", icon: Icons.local_cafe, color: Colors.black),

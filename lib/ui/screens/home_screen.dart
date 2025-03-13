@@ -20,6 +20,8 @@ class _HomeScreenState extends State<HomeScreen> {
   late UserLocationWidget userLocationWidget;
   double _currentZoom = 18.0;
 
+  String highlightedCategory = "";
+
   @override
   void initState() {
     super.initState();
@@ -36,11 +38,18 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void highlightRooms(String category) {
+    setState(() {
+      highlightedCategory = (highlightedCategory == category) ? "" : category;
+    });
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
-      drawer: const BurgerDrawer(),
+      drawer: BurgerDrawer(highlightedCategory: highlightRooms),
       body: Stack(
         children: [
           FlutterMap(
@@ -76,6 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               MarkerLayer(
                 markers: rooms.where((room) => _currentZoom >= room.minZoomThreshold).map((room) {
+                  bool highlighted = highlightedCategory.isNotEmpty && room.name.contains(highlightedCategory);
                   return Marker(
                     point: room.location,
                     width: 40,
@@ -97,7 +107,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         );
                       },
-                      child: Icon(room.icon, size: _currentZoom * 1.75, color: room.color),
+                      child: Icon(
+                        room.icon, 
+                        size: _currentZoom * 1.75, 
+                        color: highlighted ? Colors.blue : room.color
+                      ),
                     ),
                   );
                 }).toList(),

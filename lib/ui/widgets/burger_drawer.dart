@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class BurgerDrawer extends StatelessWidget {
-  const BurgerDrawer({super.key});
+  final void Function(String category) highlightedCategory;
+
+  const BurgerDrawer({super.key, required this.highlightedCategory});
 
   @override
   Widget build(BuildContext context) {
@@ -12,24 +14,26 @@ class BurgerDrawer extends StatelessWidget {
             child: Center(
               child: ListView(
                 shrinkWrap: true,
-                children: const <Widget>[
+                children: <Widget>[
                   ListTile(
-                    leading: Icon(Icons.wc_rounded),
-                    title: Text('Bathrooms'),
+                    leading: const Icon(Icons.wc_rounded),
+                    title: const Text('Bathrooms'),
+                    onTap: () => highlightedCategory("Bathroom"),
                   ),
-                  ListTile(
+                  const ListTile(
                     leading: Icon(Icons.shopping_cart_outlined),
                     title: Text('Shops'),
                   ),
                   ListTile(
-                    leading: Icon(Icons.food_bank_outlined),
-                    title: Text('Food'),
+                    leading: const Icon(Icons.food_bank_outlined),
+                    title: const Text('Food'),
+                    onTap: () => highlightedCategory("Cafeteria"),
                   ),
-                  ListTile(
+                  const ListTile(
                     leading: Icon(Icons.location_on_outlined),
                     title: Text('Highlights'),
                   ),
-                  ListTile(
+                  const ListTile(
                     leading: Icon(Icons.web),
                     title: Text('Website'),
                   ),
