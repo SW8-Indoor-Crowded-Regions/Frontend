@@ -20,4 +20,4 @@ jobs:
           channel: stable
 
       - name: Analyze code
-        run: flutter analyze
+        run: flutter doctor

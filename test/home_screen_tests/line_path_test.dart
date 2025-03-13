@@ -58,6 +58,28 @@ void main() {
     // Verify that the Polyline widgets are present in the widget tree
     expect(find.byType(PolylineLayer), findsOneWidget);
   });
+
+  testWidgets('Finds the three colors "green, yellow and red"', (WidgetTester tester) async {
+    await tester.runAsync(() async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: HomeScreenTestWrapper(
+            loadGraphDataOverride: mockLoadGraphData,
+            skipUserLocation: true,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    });
+
+    final polylineLayer = tester.widget<PolylineLayer>(find.byType(PolylineLayer));
+    final polylines = polylineLayer.polylines;
+    final colors = polylines.map((p) => p.color).toSet();
+
+    expect(colors, contains(Colors.green));
+    expect(colors, contains(Colors.yellow));
+    expect(colors, contains(Colors.red));
+  });
 }
 
 class HomeScreenTestWrapper extends StatelessWidget {
