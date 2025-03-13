@@ -38,7 +38,6 @@ migrate_working_dir/
 /windows/
 /web/
 /coverage/
-mock_data
 
 # Symbolication related
 app.*.symbols
