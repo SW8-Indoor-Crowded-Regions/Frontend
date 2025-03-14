@@ -5,6 +5,7 @@ class Room {
   final String name;
   final String description;
   final LatLng location;
+  List<LatLng>? corners;
   final IconData icon;
   final Color color;
 
@@ -12,6 +13,7 @@ class Room {
     required this.name,
     required this.description,
     required this.location,
+    this.corners,
     required this.icon,
     required this.color
   });
@@ -31,7 +33,19 @@ List<Room> rooms = [
   Room(name: "Room 107", location: const LatLng(55.688732, 12.577998), description: "Ancient Roman Statues", icon: Icons.place, color: Colors.black),
 
   // Toilets
-  Room(name: "Bathroom", location: const LatLng(55.68875, 12.57818), description: "Skibidi Toilet", icon: Icons.wc, color: Colors.black),
+  Room(
+    name: "Bathroom", 
+    location: const LatLng(55.68875, 12.57818), 
+    corners: [
+      const LatLng(55.68878846831496, 12.578127398210889), 
+      const LatLng(55.688788018310774, 12.578234373336088),
+      const LatLng(55.6887060049609, 12.578127797371794),
+      const LatLng(55.68870555495577, 12.578234373336088)
+    ], 
+    description: "Skibidi Toilet", 
+    icon: Icons.wc, 
+    color: Colors.black
+  ),
   Room(name: "Bathroom", location: const LatLng(55.688732, 12.57904), description: "Skibidi Toilet", icon: Icons.wc, color: Colors.black),
 
   // Restaurants

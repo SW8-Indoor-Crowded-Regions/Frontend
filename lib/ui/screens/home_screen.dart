@@ -55,6 +55,9 @@ class _HomeScreenState extends State<HomeScreen> {
           FlutterMap(
             mapController: mapController,
             options: MapOptions(
+              onTap: (TapPosition tapPosition, LatLng latLng) {
+                print("Tapped location: ${latLng.latitude}, ${latLng.longitude}");
+              },
               onMapEvent: (MapEvent event) {
                 if (event is MapEventMoveStart) {
                   userLocationKey.currentState?.updateAlteredMap(true);
