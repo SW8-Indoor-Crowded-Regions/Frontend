@@ -2,7 +2,7 @@ name: Flutter tests
 
 on:
   push:
-    branches: [main, test, dev]
+    branches: [main, dev]
   pull_request:
     types: [opened, synchronize, reopened]
 

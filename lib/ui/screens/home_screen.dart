@@ -1,13 +1,27 @@
+import '../widgets/path/edge_segment.dart';
+import '../widgets/room.dart';
 import '../widgets/burger_menu.dart';
+import '../../data/models/graph_models.dart';
+import '../widgets/path/line_path.dart';
+import '../../utils/path/load_graph_data.dart';
 import '../widgets/user_location_widget.dart';
 import '../widgets/burger_drawer.dart';
-import '../widgets/room.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  @visibleForTesting
+  final Future<Map<String, dynamic>> Function()? loadGraphDataFn;
+  @visibleForTesting
+  final bool skipUserLocation;
+  
+  const HomeScreen({
+    super.key,
+    this.loadGraphDataFn,
+    this.skipUserLocation = false,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -17,16 +31,27 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<UserLocationWidgetState> userLocationKey = GlobalKey<UserLocationWidgetState>();
   MapController mapController = MapController();
-  late UserLocationWidget userLocationWidget;
+  UserLocationWidget? userLocationWidget;
   double _currentZoom = 18.0;
+  List<EdgeModel> _edges = [];
+  Map<int, NodeModel> _nodeMap = {};
 
   @override
   void initState() {
     super.initState();
-    userLocationWidget = UserLocationWidget(
-      key: userLocationKey,
-      mapController: mapController, 
-    );
+    if (!widget.skipUserLocation) {
+      userLocationWidget = UserLocationWidget(
+        key: userLocationKey,
+        mapController: mapController,
+      );
+    }
+    final fn = widget.loadGraphDataFn ?? loadGraphData;
+    fn().then((graphData) {
+      setState(() {
+        _edges = graphData['edges'];
+        _nodeMap = graphData['nodeMap'];
+      });
+    });
   }
 
   @visibleForTesting
@@ -38,6 +63,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final List<EdgeSegment> segments = createEdgeSegments(_edges, _nodeMap);
+
     return Scaffold(
       key: scaffoldKey,
       drawer: const BurgerDrawer(),
@@ -75,7 +102,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 fallbackUrl: 'assets/tiles/no_tile.png',
               ),
               MarkerLayer(
-                markers: rooms.where((room) => _currentZoom >= room.minZoomThreshold).map((room) {
+                markers: rooms
+                    .where((room) => _currentZoom >= room.minZoomThreshold)
+                    .map((room) {
                   return Marker(
                     point: room.location,
                     width: 40,
@@ -97,12 +126,18 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         );
                       },
-                      child: Icon(room.icon, size: _currentZoom * 1.75, color: room.color),
+                      child: Icon(
+                        room.icon,
+                        size: _currentZoom * 1.75,
+                        color: room.color,
+                      ),
                     ),
                   );
                 }).toList(),
               ),
-              userLocationWidget,
+
+              if (segments.isNotEmpty) LinePath(segments: segments),
+              if (userLocationWidget != null) userLocationWidget!,
             ],
           ),
           Positioned(
@@ -110,23 +145,24 @@ class _HomeScreenState extends State<HomeScreen> {
             left: 16,
             child: BurgerMenu(scaffoldKey: scaffoldKey),
           ),
-          Positioned(
-            bottom: 40, 
-            right: 16, 
-            child: Container(
-              decoration: ShapeDecoration(
-                shape: const CircleBorder(),
-                color: Colors.black.withValues(alpha: 0.3),
+          if (!widget.skipUserLocation)
+            Positioned(
+              bottom: 40,
+              right: 16,
+              child: Container(
+                decoration: ShapeDecoration(
+                  shape: const CircleBorder(),
+                  color: Colors.black.withAlpha(80),
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.my_location, size: 45, color: Colors.white),
+                  onPressed: () {
+                    userLocationKey.currentState?.updateAlteredMap(false);
+                    userLocationKey.currentState?.recenterLocation();
+                  },
+                ),
               ),
-              child: IconButton(
-                icon: const Icon(Icons.my_location, size: 45, color: Colors.white),
-                onPressed: () {
-                  userLocationKey.currentState?.updateAlteredMap(false);
-                  userLocationKey.currentState?.recenterLocation();
-                },
-              ),
-            )
-          ),
+            ),
         ],
       ),        
     );
