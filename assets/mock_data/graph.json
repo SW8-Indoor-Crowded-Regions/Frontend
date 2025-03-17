@@ -1,0 +1,71 @@
+{
+  "nodes": [
+    {
+      "id": 1,
+      "latitude": 55.68875,
+      "longitude": 12.577592
+    },
+    {
+      "id": 2,
+      "latitude": 55.68875,
+      "longitude": 12.577687
+    },
+    {
+      "id": 3,
+      "latitude": 55.68875,
+      "longitude": 12.57777
+    },
+    {
+      "id": 4,
+      "latitude": 55.68875,
+      "longitude": 12.577862
+    },
+    {
+      "id": 5,
+      "latitude": 55.68875,
+      "longitude": 12.577950
+    },
+    {
+      "id": 6,
+      "latitude": 55.688708,
+      "longitude": 12.577997
+    },
+    {
+      "id": 7,
+      "latitude": 55.688647,
+      "longitude": 12.578047
+    }
+  ],
+  "edges": [
+    {
+      "source": 1,
+      "target": 2,
+      "population": 500
+    },
+    {
+      "source": 2,
+      "target": 3,
+      "population": 1000
+    },
+    {
+      "source": 3,
+      "target": 4,
+      "population": 500
+    },
+    {
+      "source": 4,
+      "target": 5,
+      "population": 1500
+    },
+    {
+      "source": 5,
+      "target": 6,
+      "population": 2500
+    },
+    {
+      "source": 6,
+      "target": 7,
+      "population": 500
+    }
+  ]
+}
