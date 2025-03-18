@@ -36,6 +36,8 @@ class _HomeScreenState extends State<HomeScreen> {
   List<EdgeModel> _edges = [];
   Map<int, NodeModel> _nodeMap = {};
 
+  String highlightedCategory = "";
+
   @override
   void initState() {
     super.initState();
@@ -61,13 +63,20 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void highlightRooms(String category) {
+    setState(() {
+      highlightedCategory = (highlightedCategory == category) ? "" : category;
+    });
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     final List<EdgeSegment> segments = createEdgeSegments(_edges, _nodeMap);
 
     return Scaffold(
       key: scaffoldKey,
-      drawer: const BurgerDrawer(),
+      drawer: BurgerDrawer(highlightedCategory: highlightRooms),
       body: Stack(
         children: [
           FlutterMap(
@@ -102,9 +111,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 fallbackUrl: 'assets/tiles/no_tile.png',
               ),
               MarkerLayer(
-                markers: rooms
-                    .where((room) => _currentZoom >= room.minZoomThreshold)
-                    .map((room) {
+                markers: rooms.where((room) => _currentZoom >= room.minZoomThreshold).map((room) {
+                  bool highlighted = highlightedCategory.isNotEmpty && room.name.contains(highlightedCategory);
                   return Marker(
                     point: room.location,
                     width: 40,
@@ -127,9 +135,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       },
                       child: Icon(
-                        room.icon,
-                        size: _currentZoom * 1.75,
-                        color: room.color,
+                        room.icon, 
+                        size: _currentZoom * 1.75, 
+                        color: highlighted ? Colors.blue : room.color
                       ),
                     ),
                   );
