@@ -6,7 +6,7 @@ import '../widgets/path/line_path.dart';
 import '../../utils/path/load_graph_data.dart';
 import '../widgets/user_location_widget.dart';
 import '../widgets/burger_drawer.dart';
-
+import '../widgets/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -28,6 +28,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final APIService apiService = APIService(); 
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<UserLocationWidgetState> userLocationKey = GlobalKey<UserLocationWidgetState>();
   MapController mapController = MapController();
@@ -68,6 +69,16 @@ class _HomeScreenState extends State<HomeScreen> {
       highlightedCategory = (highlightedCategory == category) ? "" : category;
     });
     Navigator.pop(context);
+  }
+
+  Future<String> fetchArtwork(String query) async {
+    try {
+      final response = await apiService.searchArtwork(query);
+      return response.data.toString();
+    } catch (e) {
+      print("Error: $e");
+      throw Exception("Failed to fetch artwork");
+    }
   }
 
   @override
@@ -124,7 +135,23 @@ class _HomeScreenState extends State<HomeScreen> {
                           context: context,
                           builder: (context) => AlertDialog(
                             title: Text(room.name),
-                            content: Text(room.description),
+                            content: FutureBuilder<String>(
+                              future: fetchArtwork("minimumsbetragtning"), 
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  return const Center(child: CircularProgressIndicator());
+                                } else if (snapshot.hasError) {
+                                  return Text("Error: ${snapshot.error}");
+                                } else {
+                                  return Card(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(snapshot.data ?? "No data available"),
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context),
