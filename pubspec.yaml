@@ -17,6 +17,7 @@ dependencies:
   flutter_map: ^8.0.0
   location: ^8.0.0
   latlong2: ^0.9.1
+  dio: ^5.8.0+1
 
 dev_dependencies:
   flutter_test:
