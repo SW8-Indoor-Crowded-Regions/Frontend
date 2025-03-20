@@ -76,7 +76,6 @@ class _HomeScreenState extends State<HomeScreen> {
       final response = await apiService.searchArtwork(query);
       return response.data.toString();
     } catch (e) {
-      print("Error: $e");
       throw Exception("Failed to fetch artwork");
     }
   }
