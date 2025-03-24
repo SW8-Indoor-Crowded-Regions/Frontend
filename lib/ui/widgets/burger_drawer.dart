@@ -1,9 +1,22 @@
 import 'package:flutter/material.dart';
+import 'exhibits_menu.dart';
 
-class BurgerDrawer extends StatelessWidget {
+class BurgerDrawer extends StatefulWidget {
   final void Function(String category) highlightedCategory;
 
   const BurgerDrawer({super.key, required this.highlightedCategory});
+
+  @override
+  State<BurgerDrawer> createState() => BurgerDrawerState();
+}
+
+class BurgerDrawerState extends State<BurgerDrawer> {
+
+  bool showExhibitsMenu = false;
+
+  void highlightedCategory(String category) {
+    widget.highlightedCategory(category);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +25,8 @@ class BurgerDrawer extends StatelessWidget {
         children: [
           Expanded(
             child: Center(
-              child: ListView(
+              child: showExhibitsMenu ? const ExhibitsMenu() :
+              ListView(
                 shrinkWrap: true,
                 children: <Widget>[
                   ListTile(
@@ -29,9 +43,12 @@ class BurgerDrawer extends StatelessWidget {
                     title: const Text('Food'),
                     onTap: () => highlightedCategory("Cafeteria"),
                   ),
-                  const ListTile(
-                    leading: Icon(Icons.location_on_outlined),
-                    title: Text('Highlights'),
+                  ListTile(
+                    leading: const Icon(Icons.location_on_outlined),
+                    title: const Text('Exhibits'),
+                    onTap: () => setState(() {
+                      showExhibitsMenu = true;
+                    }),
                   ),
                   const ListTile(
                     leading: Icon(Icons.web),
