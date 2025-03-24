@@ -3,19 +3,24 @@ import 'exhibits_menu.dart';
 
 class BurgerDrawer extends StatefulWidget {
   final void Function(String category) highlightedCategory;
-
-  const BurgerDrawer({super.key, required this.highlightedCategory});
-
+  const BurgerDrawer({super.key, this.highlightedCategory = _defaultHighlightedCategory});
+  static void _defaultHighlightedCategory(String category) {}
   @override
   State<BurgerDrawer> createState() => BurgerDrawerState();
 }
 
 class BurgerDrawerState extends State<BurgerDrawer> {
-
   bool showExhibitsMenu = false;
 
   void highlightedCategory(String category) {
     widget.highlightedCategory(category);
+  }
+
+  void showExhibitsMenuFunc(bool show) {
+    setState(() {
+      showExhibitsMenu = show;
+    });
+    print(showExhibitsMenu);
   }
 
   @override
@@ -25,7 +30,7 @@ class BurgerDrawerState extends State<BurgerDrawer> {
         children: [
           Expanded(
             child: Center(
-              child: showExhibitsMenu ? const ExhibitsMenu() :
+              child: showExhibitsMenu ? ExhibitsMenu(showExhibitsMenu: showExhibitsMenuFunc) :
               ListView(
                 shrinkWrap: true,
                 children: <Widget>[

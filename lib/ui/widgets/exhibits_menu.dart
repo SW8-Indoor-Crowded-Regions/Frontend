@@ -1,21 +1,35 @@
 import 'package:flutter/material.dart';
 import 'api_service.dart';
+import 'burger_drawer.dart';
 
 class ExhibitsMenu extends StatefulWidget {
-  const ExhibitsMenu({super.key});
-
+  final void Function(bool show) showExhibitsMenu;
+  const ExhibitsMenu({super.key, this.showExhibitsMenu = _defaultShowExhibitsMenu});
+  static void _defaultShowExhibitsMenu(bool show) {}
   @override
   State<ExhibitsMenu> createState() => _ExhibitsMenuState();
 }
 
 class _ExhibitsMenuState extends State<ExhibitsMenu> {
   APIService apiService = APIService();
+  bool fetchingArtworks = false;
   List<String> previousSearch = [];
   List<String> artworks = [];
+
+  void showExhibits(bool show) {
+    widget.showExhibitsMenu(show);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.chevron_left),
+          onPressed: () => showExhibits(false),
+        ),
+        title: const Text("Search Exhibits"),
+      ),
         body: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(
@@ -33,7 +47,6 @@ class _ExhibitsMenuState extends State<ExhibitsMenu> {
                         final List<dynamic> data = response.data;
                         setState(() {
                           artworks = List<String>.from(data);
-                          print(artworks[0] is String);
                         });
                       } catch (e) {
                         print("Error fetching artwork: $e");
@@ -57,18 +70,23 @@ class _ExhibitsMenuState extends State<ExhibitsMenu> {
                 },
               ),
               Expanded(
-                child: artworks.isEmpty ? const Center(child: Text("No results found"))
-                  : ListView.builder(
+                child: Stack(
+                  children: [
+                    artworks.isEmpty ? const Center(child: Text("No results found"))
+                    : ListView.builder(
                       itemCount: artworks.length,
                       itemBuilder: (context, index) {
                         return FutureBuilder(
                           future: apiService.getArtwork(artworks[index]),
                           builder: (context, snapshot) {
                             if (snapshot.connectionState == ConnectionState.waiting) {
-                              return const Center(child: CircularProgressIndicator());
+                              fetchingArtworks = true;
+                              return const Center(child: Text(""));
                             } else if (snapshot.hasError) {
+                              fetchingArtworks = false;
                               return const Center(child: Text("Error loading artwork"));
                             } else {
+                              fetchingArtworks = false;
                               final artwork = snapshot.data?.data[0];
                               return Card(
                                 child: ListTile(
@@ -81,6 +99,16 @@ class _ExhibitsMenuState extends State<ExhibitsMenu> {
                         );
                       },
                     ),
+                    if (fetchingArtworks)
+                      Positioned.fill(
+                        child: Container(
+                          color: Colors.black.withOpacity(0.3),
+                          child: const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        ),
+                      ),
+                  ])
               ),
             ],
           ),
