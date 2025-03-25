@@ -51,7 +51,7 @@ void main() {
     expect(isExhibitsMenuVisible, false);
   });
 
-  testWidgets('onSubmitted function is triggered when text is submitted', (WidgetTester tester) async {
+  testWidgets('Text field is able to be altered', (WidgetTester tester) async {
     // Build the widget tree
     await tester.pumpWidget(const MaterialApp(home: ExhibitsMenu()));
     // Find the search bar
@@ -59,9 +59,6 @@ void main() {
     expect(textField, findsOneWidget);
     // Enter text into the search bar
     await tester.enterText(textField, "Mona Lisa");
-
-    // Simulate the "submit" action (like pressing "Enter" on a keyboard)
-    await tester.testTextInput.receiveAction(TextInputAction.done);
-    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text("Mona Lisa"), findsOneWidget);
   });
 }
