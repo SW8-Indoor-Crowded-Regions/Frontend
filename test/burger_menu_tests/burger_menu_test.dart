@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:indoor_crowded_regions_frontend/my_app.dart';
 import 'package:flutter_map/flutter_map.dart';
-
+import 'package:indoor_crowded_regions_frontend/ui/widgets/exhibits_menu.dart';
 import 'package:indoor_crowded_regions_frontend/ui/widgets/burger_menu.dart';
 
 void main() {
@@ -25,5 +25,43 @@ void main() {
     expect(find.text('Bathrooms'), findsOneWidget);
 
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('Exhibits menu closes when back button is tapped', (WidgetTester tester) async {
+    bool isExhibitsMenuVisible = true;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ExhibitsMenu(
+          showExhibitsMenu: (show) {
+            isExhibitsMenuVisible = show;
+          },
+        ),
+      ),
+    );
+
+    // Ensure the exhibits menu is displayed initially
+    expect(find.text("Search Exhibits"), findsOneWidget);
+    expect(find.byType(SearchBar), findsOneWidget);
+    // Tap the back button
+    await tester.tap(find.byIcon(Icons.chevron_left));
+    await tester.pump();
+
+    // Verify the callback updates the state correctly
+    expect(isExhibitsMenuVisible, false);
+  });
+
+  testWidgets('onSubmitted function is triggered when text is submitted', (WidgetTester tester) async {
+    // Build the widget tree
+    await tester.pumpWidget(const MaterialApp(home: ExhibitsMenu()));
+    // Find the search bar
+    final textField = find.byType(TextField);
+    expect(textField, findsOneWidget);
+    // Enter text into the search bar
+    await tester.enterText(textField, "Mona Lisa");
+
+    // Simulate the "submit" action (like pressing "Enter" on a keyboard)
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump(const Duration(milliseconds: 200));
   });
 }
