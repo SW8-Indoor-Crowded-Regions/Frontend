@@ -79,14 +79,9 @@ class _ExhibitsMenuState extends State<ExhibitsMenu> {
                         return FutureBuilder(
                           future: apiService.getArtwork(artworks[index]),
                           builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              fetchingArtworks = true;
-                              return const Center(child: Text(""));
-                            } else if (snapshot.hasError) {
-                              fetchingArtworks = false;
+                            if (snapshot.hasError) {
                               return const Center(child: Text("Error loading artwork"));
                             } else {
-                              fetchingArtworks = false;
                               final artwork = snapshot.data?.data[0];
                               return Card(
                                 child: ListTile(
@@ -99,15 +94,6 @@ class _ExhibitsMenuState extends State<ExhibitsMenu> {
                         );
                       },
                     ),
-                    if (fetchingArtworks)
-                      Positioned.fill(
-                        child: Container(
-                          color: Colors.black.withOpacity(0.3),
-                          child: const Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                        ),
-                      ),
                   ])
               ),
             ],
