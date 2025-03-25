@@ -20,7 +20,6 @@ class BurgerDrawerState extends State<BurgerDrawer> {
     setState(() {
       showExhibitsMenu = show;
     });
-    print(showExhibitsMenu);
   }
 
   @override

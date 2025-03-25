@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'api_service.dart';
-import 'burger_drawer.dart';
 
 class ExhibitsMenu extends StatefulWidget {
   final void Function(bool show) showExhibitsMenu;
@@ -49,7 +48,7 @@ class _ExhibitsMenuState extends State<ExhibitsMenu> {
                           artworks = List<String>.from(data);
                         });
                       } catch (e) {
-                        print("Error fetching artwork: $e");
+                        throw Exception("Failed to search for artworks");
                       }
                     },
                     leading: const Icon(Icons.search),
