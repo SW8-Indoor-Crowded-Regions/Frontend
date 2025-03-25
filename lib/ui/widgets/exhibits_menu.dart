@@ -79,7 +79,10 @@ class _ExhibitsMenuState extends State<ExhibitsMenu> {
                         return FutureBuilder(
                           future: apiService.getArtwork(artworks[index]),
                           builder: (context, snapshot) {
-                            if (snapshot.hasError) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const Center(child: Text(""));
+                            }
+                            else if (snapshot.hasError) {
                               return const Center(child: Text("Error loading artwork"));
                             } else {
                               final artwork = snapshot.data?.data[0];
