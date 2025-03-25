@@ -71,15 +71,6 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.pop(context);
   }
 
-  Future<String> fetchArtwork(String query) async {
-    try {
-      final response = await apiService.searchArtwork(query);
-      return response.data.toString();
-    } catch (e) {
-      throw Exception("Failed to fetch artwork");
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final List<EdgeSegment> segments = createEdgeSegments(_edges, _nodeMap);
@@ -134,23 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           context: context,
                           builder: (context) => AlertDialog(
                             title: Text(room.name),
-                            content: FutureBuilder<String>(
-                              future: fetchArtwork("minimumsbetragtning"), 
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState == ConnectionState.waiting) {
-                                  return const Center(child: CircularProgressIndicator());
-                                } else if (snapshot.hasError) {
-                                  return Text("Error: ${snapshot.error}");
-                                } else {
-                                  return Card(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(snapshot.data ?? "No data available"),
-                                    ),
-                                  );
-                                }
-                              },
-                            ),
+                            content: Text(room.description),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context),

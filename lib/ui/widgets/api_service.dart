@@ -14,4 +14,14 @@ class APIService {
     }
   }
 
+  Future<Response> getArtwork(String query) async {
+    try {
+      Response response;
+      response = await dio.get("${baseUrl}smk/get-artwork", queryParameters: {"keys": query});
+      return response;
+    } catch (e) {
+      throw Exception("Failed to fetch artwork");
+    }
+  }
+
 }
