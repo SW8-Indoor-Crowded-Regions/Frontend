@@ -6,7 +6,7 @@ import '../widgets/path/line_path.dart';
 import '../../utils/path/load_graph_data.dart';
 import '../widgets/user_location_widget.dart';
 import '../widgets/burger_drawer.dart';
-import '../widgets/api_service.dart';
+import '../../services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
