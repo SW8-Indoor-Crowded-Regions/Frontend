@@ -110,22 +110,22 @@ class UserLocationWidgetState extends State<UserLocationWidget> {
   }
 
   void recenterLocation() {
-  if (_locationData != null) {
-    double adjustedLat = _locationData!.latitude! + latOffset;
-    double adjustedLong = _locationData!.longitude! + longOffset;
-    widget.mapController.move(
-      LatLng(adjustedLat, adjustedLong),
-      widget.mapController.camera.zoom,
-    );
-    // DO NOT DELETE COMMENT PLZ (this is the actual implementation, the above is used for offset)
-    /*
-    widget.mapController.move(
-      LatLng(_locationData!.latitude!, _locationData!.longitude!), 
-      widget.mapController.camera.zoom,
-    );
-    */
+    if (_locationData != null) {
+      double adjustedLat = _locationData!.latitude! + latOffset;
+      double adjustedLong = _locationData!.longitude! + longOffset;
+      widget.mapController.move(
+        LatLng(adjustedLat, adjustedLong),
+        widget.mapController.camera.zoom,
+      );
+      // DO NOT DELETE COMMENT PLZ (this is the actual implementation, the above is used for offset)
+      /*
+      widget.mapController.move(
+        LatLng(_locationData!.latitude!, _locationData!.longitude!), 
+        widget.mapController.camera.zoom,
+      );
+      */
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {

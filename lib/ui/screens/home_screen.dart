@@ -6,7 +6,7 @@ import '../widgets/path/line_path.dart';
 import '../../utils/path/load_graph_data.dart';
 import '../widgets/user_location_widget.dart';
 import '../widgets/burger_drawer.dart';
-
+import '../widgets/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -28,6 +28,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final APIService apiService = APIService(); 
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<UserLocationWidgetState> userLocationKey = GlobalKey<UserLocationWidgetState>();
   MapController mapController = MapController();
@@ -35,6 +36,8 @@ class _HomeScreenState extends State<HomeScreen> {
   double _currentZoom = 18.0;
   List<EdgeModel> _edges = [];
   Map<int, NodeModel> _nodeMap = {};
+
+  String highlightedCategory = "";
 
   @override
   void initState() {
@@ -61,13 +64,20 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void highlightRooms(String category) {
+    setState(() {
+      highlightedCategory = (highlightedCategory == category) ? "" : category;
+    });
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     final List<EdgeSegment> segments = createEdgeSegments(_edges, _nodeMap);
 
     return Scaffold(
       key: scaffoldKey,
-      drawer: const BurgerDrawer(),
+      drawer: BurgerDrawer(highlightedCategory: highlightRooms),
       body: Stack(
         children: [
           FlutterMap(
@@ -102,9 +112,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 fallbackUrl: 'assets/tiles/no_tile.png',
               ),
               MarkerLayer(
-                markers: rooms
-                    .where((room) => _currentZoom >= room.minZoomThreshold)
-                    .map((room) {
+                markers: rooms.where((room) => _currentZoom >= room.minZoomThreshold).map((room) {
+                  bool highlighted = highlightedCategory.isNotEmpty && room.name.contains(highlightedCategory);
                   return Marker(
                     point: room.location,
                     width: 40,
@@ -127,9 +136,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       },
                       child: Icon(
-                        room.icon,
-                        size: _currentZoom * 1.75,
-                        color: room.color,
+                        room.icon, 
+                        size: _currentZoom * 1.75, 
+                        color: highlighted ? Colors.blue : room.color
                       ),
                     ),
                   );
