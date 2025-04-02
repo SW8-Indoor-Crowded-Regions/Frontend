@@ -107,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               TileLayer(
                 tileProvider: AssetTileProvider(),
-                urlTemplate: 'assets/tiles/{z}/{x}/{y}.png',
+                urlTemplate: 'assets/tiles/2/{z}/{x}/{y}.png', // TODO: Make the floor number dynamic
                 errorImage: const AssetImage('assets/tiles/no_tile.png'),
                 fallbackUrl: 'assets/tiles/no_tile.png',
               ),
