@@ -1,12 +1,10 @@
-import '../widgets/path/edge_segment.dart';
 import '../widgets/room.dart';
 import '../widgets/burger_menu.dart';
-import '../../data/models/graph_models.dart';
 import '../widgets/path/line_path.dart';
-import '../../utils/path/load_graph_data.dart';
 import '../widgets/user_location_widget.dart';
 import '../widgets/burger_drawer.dart';
 import '../../services/api_service.dart';
+import '../../services/gateway_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -16,11 +14,13 @@ class HomeScreen extends StatefulWidget {
   final Future<Map<String, dynamic>> Function()? loadGraphDataFn;
   @visibleForTesting
   final bool skipUserLocation;
+  final GatewayService? gatewayService;
   
   const HomeScreen({
     super.key,
     this.loadGraphDataFn,
     this.skipUserLocation = false,
+    this.gatewayService,
   });
 
   @override
@@ -28,15 +28,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final APIService apiService = APIService(); 
+  final APIService apiService = APIService();
+  final GatewayService gatewayService = GatewayService();
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<UserLocationWidgetState> userLocationKey = GlobalKey<UserLocationWidgetState>();
   MapController mapController = MapController();
   UserLocationWidget? userLocationWidget;
   double _currentZoom = 18.0;
-  List<EdgeModel> _edges = [];
-  Map<int, NodeModel> _nodeMap = {};
-
   String highlightedCategory = "";
 
   @override
@@ -48,13 +46,6 @@ class _HomeScreenState extends State<HomeScreen> {
         mapController: mapController,
       );
     }
-    final fn = widget.loadGraphDataFn ?? loadGraphData;
-    fn().then((graphData) {
-      setState(() {
-        _edges = graphData['edges'];
-        _nodeMap = graphData['nodeMap'];
-      });
-    });
   }
 
   @visibleForTesting
@@ -73,7 +64,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final List<EdgeSegment> segments = createEdgeSegments(_edges, _nodeMap);
+    final Future<List<Map<String, dynamic>>> edgesFuture = gatewayService.getFastestRouteWithCoordinates(
+      "sensor1",
+      "sensor2",
+    );
 
     return Scaffold(
       key: scaffoldKey,
@@ -145,7 +139,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 }).toList(),
               ),
 
-              if (segments.isNotEmpty) LinePath(segments: segments),
+              FutureBuilder<List<Map<String, dynamic>>>(
+                future: edgesFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                    return LinePath(pathCoordinates: snapshot.data!);
+                  } else {
+                    return const SizedBox.shrink();
+                  }
+                },
+              ),
               if (userLocationWidget != null) userLocationWidget!,
             ],
           ),

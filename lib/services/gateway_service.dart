@@ -4,27 +4,43 @@ class GatewayService {
   final dio = Dio();
   final String baseUrl = "http://localhost:8000/";
 
+  // Flag to control whether to use mock data
+  bool useMockData = true;
+
   Future<List<Map<String, dynamic>>> getFastestRouteWithCoordinates(
-    String source,
-    String target
-  ) async {
-    try {
-      Response response = await dio.post(
-        "${baseUrl}fastest-path",
-        data: {
-          "source": source,
-          "target": target,
-        },
-      );
+      String source, String target) async {
+    if (useMockData) {
+      return _getMockFastestRoute();
+    } else {
+      try {
+        Response response = await dio.post(
+          "${baseUrl}pathfinding/fastest-path",
+          data: {
+            "source_sensor": source,
+            "target_sensor": target,
+          },
+        );
 
-      List<Map<String, dynamic>> sensorsWithCoordinates =
-          (response.data['fastest_path'] as List)
-              .cast<Map<String, dynamic>>();
-      return sensorsWithCoordinates;
-
-    } catch (e) {
-      throw Exception(
-          "Failed to fetch fastest route with coordinates: $e");
+        List<Map<String, dynamic>> sensorsWithCoordinates =
+            (response.data['fastest_path'] as List)
+                .cast<Map<String, dynamic>>();
+        return sensorsWithCoordinates;
+      } catch (e) {
+        throw Exception(
+            "Failed to fetch fastest route with coordinates: $e");
+      }
     }
+  }
+
+  // Function to return mock data
+  Future<List<Map<String, dynamic>>> _getMockFastestRoute() async {
+    // Simulate a delay if needed, to mimic an API call
+    await Future.delayed(const Duration(milliseconds: 500));
+    return [
+      {"id": "sensor1", "longitude": 12.577325, "latitude": 55.688495},
+      {"id": "sensor2", "longitude": 12.577545, "latitude": 55.688732},
+      {"id": "sensor3", "longitude": 12.577640, "latitude": 55.688732},
+      {"id": "sensor4", "longitude": 12.577728, "latitude": 55.688732},
+    ];
   }
 }

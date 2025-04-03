@@ -1,26 +1,9 @@
-import 'package:indoor_crowded_regions_frontend/data/models/graph_models.dart';
 import 'package:indoor_crowded_regions_frontend/ui/screens/home_screen.dart';
 import 'package:indoor_crowded_regions_frontend/ui/widgets/path/line_path.dart';
 
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-Future<Map<String, dynamic>> mockLoadGraphData() async {
-  return {
-    'edges': <EdgeModel>[
-      EdgeModel(source: 1, target: 2, population: 500),
-      EdgeModel(source: 2, target: 3, population: 1500),
-      EdgeModel(source: 3, target: 4, population: 2000),
-    ],
-    'nodeMap': <int, NodeModel>{
-      1: NodeModel(id: 1, latitude: 55.68875, longitude: 12.577592),
-      2: NodeModel(id: 2, latitude: 55.68875, longitude: 12.577687),
-      3: NodeModel(id: 3, latitude: 55.68875, longitude: 12.577782),
-      4: NodeModel(id: 4, latitude: 55.68875, longitude: 12.577877),
-    },
-  };
-}
 
 void main() {
   testWidgets('Finds a LinePath widget', (WidgetTester tester) async {
@@ -29,7 +12,6 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: HomeScreenTestWrapper(
-            loadGraphDataOverride: mockLoadGraphData,
             skipUserLocation: true,
           ),
         ),
@@ -47,7 +29,6 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: HomeScreenTestWrapper(
-            loadGraphDataOverride: mockLoadGraphData,
             skipUserLocation: true,
           ),
         ),
@@ -64,7 +45,6 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: HomeScreenTestWrapper(
-            loadGraphDataOverride: mockLoadGraphData,
             skipUserLocation: true,
           ),
         ),
