@@ -32,12 +32,9 @@ class GatewayService {
     }
   }
 
-  // Function to return mock data
   Future<List<Map<String, dynamic>>> _getMockFastestRoute() async {
-    // Simulate a delay if needed, to mimic an API call
     await Future.delayed(const Duration(milliseconds: 500));
     return [
-      {"id": "sensor1", "longitude": 12.577325, "latitude": 55.688495},
       {"id": "sensor2", "longitude": 12.577545, "latitude": 55.688732},
       {"id": "sensor3", "longitude": 12.577640, "latitude": 55.688732},
       {"id": "sensor4", "longitude": 12.577728, "latitude": 55.688732},

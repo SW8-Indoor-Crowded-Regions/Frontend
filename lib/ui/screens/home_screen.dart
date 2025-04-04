@@ -11,7 +11,7 @@ import 'package:latlong2/latlong.dart';
 
 class HomeScreen extends StatefulWidget {
   @visibleForTesting
-  final Future<Map<String, dynamic>> Function()? loadGraphDataFn;
+  final Future<List<Map<String, dynamic>>> Function(dynamic)? loadGraphDataFn;
   @visibleForTesting
   final bool skipUserLocation;
   final GatewayService? gatewayService;
@@ -29,13 +29,13 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final APIService apiService = APIService();
-  final GatewayService gatewayService = GatewayService();
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<UserLocationWidgetState> userLocationKey = GlobalKey<UserLocationWidgetState>();
   MapController mapController = MapController();
   UserLocationWidget? userLocationWidget;
   double _currentZoom = 18.0;
   String highlightedCategory = "";
+  late Future<List<Map<String, dynamic>>> _edgesFuture;
 
   @override
   void initState() {
@@ -44,6 +44,15 @@ class _HomeScreenState extends State<HomeScreen> {
       userLocationWidget = UserLocationWidget(
         key: userLocationKey,
         mapController: mapController,
+      );
+    }
+    if (widget.loadGraphDataFn != null) {
+      _edgesFuture = widget.loadGraphDataFn!("test");
+    } else {
+      final gatewayService = widget.gatewayService ?? GatewayService();
+      _edgesFuture = gatewayService.getFastestRouteWithCoordinates(
+        "sensor2",
+        "sensor4",
       );
     }
   }
@@ -64,11 +73,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final Future<List<Map<String, dynamic>>> edgesFuture = gatewayService.getFastestRouteWithCoordinates(
-      "sensor1",
-      "sensor2",
-    );
-
     return Scaffold(
       key: scaffoldKey,
       drawer: BurgerDrawer(highlightedCategory: highlightRooms),
@@ -130,17 +134,16 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       },
                       child: Icon(
-                        room.icon, 
-                        size: _currentZoom * 1.75, 
-                        color: highlighted ? Colors.blue : room.color
+                        room.icon,
+                        size: _currentZoom * 1.75,
+                        color: highlighted ? Colors.blue : room.color,
                       ),
                     ),
                   );
                 }).toList(),
               ),
-
               FutureBuilder<List<Map<String, dynamic>>>(
-                future: edgesFuture,
+                future: _edgesFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
@@ -180,7 +183,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
         ],
-      ),        
+      ),
     );
   }
 }
