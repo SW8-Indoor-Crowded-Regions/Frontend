@@ -111,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 urlTemplate: 'assets/tiles/$_currentFloor/{z}/{x}/{y}.png',
                 errorImage: const AssetImage('assets/tiles/no_tile.png'),
                 fallbackUrl: 'assets/tiles/no_tile.png',
-              ),/*
+              ),
               MarkerLayer(
                 markers: rooms.where((room) => _currentZoom >= room.minZoomThreshold).map((room) {
                   bool highlighted = highlightedCategory.isNotEmpty && room.name.contains(highlightedCategory);
@@ -144,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   );
                 }).toList(),
-              ),*/
+              ),
 
               if (segments.isNotEmpty) LinePath(segments: segments),
               if (userLocationWidget != null) userLocationWidget!,
