@@ -34,6 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
   MapController mapController = MapController();
   UserLocationWidget? userLocationWidget;
   double _currentZoom = 18.0;
+  int _currentFloor = 1;
   String highlightedCategory = "";
   late Future<List<Map<String, dynamic>>> _edgesFuture;
 
@@ -105,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               TileLayer(
                 tileProvider: AssetTileProvider(),
-                urlTemplate: 'assets/tiles/{z}/{x}/{y}.png',
+                urlTemplate: 'assets/tiles/$_currentFloor/{z}/{x}/{y}.png',
                 errorImage: const AssetImage('assets/tiles/no_tile.png'),
                 fallbackUrl: 'assets/tiles/no_tile.png',
               ),
@@ -163,6 +164,53 @@ class _HomeScreenState extends State<HomeScreen> {
             top: 40,
             left: 16,
             child: BurgerMenu(scaffoldKey: scaffoldKey),
+          ),
+          Positioned(
+            bottom: 40,
+            left: 16,
+            child: Column(
+              children: [
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _currentFloor = 3;
+                    });
+                  },
+                  style: TextButton.styleFrom(
+                    shape: const CircleBorder(),
+                    backgroundColor: Colors.blue,
+                    padding: const EdgeInsets.all(20),
+                  ),
+                  child: const Text("Floor 3"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _currentFloor = 2;
+                    });
+                  },
+                  style: TextButton.styleFrom(
+                    shape: const CircleBorder(),
+                    backgroundColor: Colors.blue,
+                    padding: const EdgeInsets.all(20),
+                  ),
+                  child: const Text("Floor 2"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _currentFloor = 1;
+                    });
+                  },
+                  style: TextButton.styleFrom(
+                    shape: const CircleBorder(),
+                    backgroundColor: Colors.blue,
+                    padding: const EdgeInsets.all(20),
+                  ),
+                  child: const Text("Floor 1"),
+                ),
+              ],
+            ),
           ),
           if (!widget.skipUserLocation)
             Positioned(

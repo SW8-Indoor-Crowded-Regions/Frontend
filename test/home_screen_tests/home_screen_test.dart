@@ -24,12 +24,13 @@ void main() {
 
   testWidgets('Renders SMK map and finds room 101', (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
+    await tester.pump(const Duration(milliseconds: 200));
     await tester.pumpAndSettle();
 
     expect(find.byType(FlutterMap), findsOneWidget);
-
     final homeScreenState = tester.state(find.byType(HomeScreen)) as dynamic;
     homeScreenState.setZoom(19.0);
+    await tester.pump(const Duration(milliseconds: 200));
     await tester.pumpAndSettle();
 
     final markerIconFinder = find.byIcon(Icons.place);
