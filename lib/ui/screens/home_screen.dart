@@ -52,8 +52,8 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       final gatewayService = widget.gatewayService ?? GatewayService();
       _edgesFuture = gatewayService.getFastestRouteWithCoordinates(
-        "sensor2",
-        "sensor4",
+        "67efbb220b23f5290bff707f",
+        "67efbb220b23f5290bff7080",
       );
     }
   }
