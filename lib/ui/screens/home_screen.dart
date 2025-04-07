@@ -166,12 +166,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       _currentFloor = 3;
                     });
                   },
-                  child: const Text("Floor 3"),
                   style: TextButton.styleFrom(
                     shape: const CircleBorder(),
                     backgroundColor: Colors.blue,
                     padding: const EdgeInsets.all(20),
                   ),
+                  child: const Text("Floor 3"),
                 ),
                 TextButton(
                   onPressed: () {
