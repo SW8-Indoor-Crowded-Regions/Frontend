@@ -1,11 +1,14 @@
 import 'package:dio/dio.dart';
 
 class GatewayService {
-  final dio = Dio();
-  final String baseUrl = "http://localhost:8000/";
+  final dio = Dio(BaseOptions(
+    connectTimeout: const Duration(seconds: 30),
+    receiveTimeout: const Duration(seconds: 30),
+  ));
+  final String baseUrl = "http://127.0.0.1:8000";
 
   // Flag to control whether to use mock data
-  bool useMockData = true;
+  bool useMockData = false;
 
   Future<List<Map<String, dynamic>>> getFastestRouteWithCoordinates(
       String source, String target) async {
@@ -14,10 +17,10 @@ class GatewayService {
     } else {
       try {
         Response response = await dio.post(
-          "${baseUrl}pathfinding/fastest-path",
+          "$baseUrl/fastest-path",
           data: {
-            "source_sensor": source,
-            "target_sensor": target,
+            "source": "67efbb210b23f5290bff704b",
+            "target": "67efbb210b23f5290bff704c"
           },
         );
 
@@ -26,8 +29,10 @@ class GatewayService {
                 .cast<Map<String, dynamic>>();
         return sensorsWithCoordinates;
       } catch (e) {
+        print("URL: $baseUrl/fastest-path");
+        print("Error: $e");
         throw Exception(
-            "Failed to fetch fastest route with coordinates: $e");
+            "Failed to fetch fastest route with error: $e");
       }
     }
   }
