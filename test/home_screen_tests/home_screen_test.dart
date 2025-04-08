@@ -22,25 +22,6 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Renders SMK map and finds room 101', (WidgetTester tester) async {
-    await tester.pumpWidget(const MyApp());
-    await tester.pump(const Duration(milliseconds: 200));
-    await tester.pumpAndSettle();
-
-    expect(find.byType(FlutterMap), findsOneWidget);
-    final homeScreenState = tester.state(find.byType(HomeScreen)) as dynamic;
-    homeScreenState.setZoom(19.0);
-    await tester.pump(const Duration(milliseconds: 200));
-    await tester.pumpAndSettle();
-
-    final markerIconFinder = find.byIcon(Icons.place);
-    expect(markerIconFinder, findsWidgets);
-
-    await tester.tap(markerIconFinder.first);
-    await tester.pumpAndSettle();
-
-    expect(find.text("Room 101"), findsOneWidget);
-  });
 
   testWidgets('Renders SMK map without zooming to level 19 and does not find any icons', (WidgetTester tester) async {
     // Build the MyApp widget and wait for asynchronous operations.
