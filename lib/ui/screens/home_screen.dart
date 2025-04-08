@@ -1,26 +1,26 @@
-import '../widgets/path/edge_segment.dart';
 import '../widgets/room.dart';
 import '../widgets/burger_menu.dart';
-import '../../data/models/graph_models.dart';
 import '../widgets/path/line_path.dart';
-import '../../utils/path/load_graph_data.dart';
 import '../widgets/user_location_widget.dart';
 import '../widgets/burger_drawer.dart';
-import '../widgets/api_service.dart';
+import '../../services/api_service.dart';
+import '../../services/gateway_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 class HomeScreen extends StatefulWidget {
   @visibleForTesting
-  final Future<Map<String, dynamic>> Function()? loadGraphDataFn;
+  final Future<List<Map<String, dynamic>>> Function(dynamic)? loadGraphDataFn;
   @visibleForTesting
   final bool skipUserLocation;
+  final GatewayService? gatewayService;
   
   const HomeScreen({
     super.key,
     this.loadGraphDataFn,
     this.skipUserLocation = false,
+    this.gatewayService,
   });
 
   @override
@@ -28,16 +28,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final APIService apiService = APIService(); 
+  final APIService apiService = APIService();
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<UserLocationWidgetState> userLocationKey = GlobalKey<UserLocationWidgetState>();
   MapController mapController = MapController();
   UserLocationWidget? userLocationWidget;
   double _currentZoom = 18.0;
-  List<EdgeModel> _edges = [];
-  Map<int, NodeModel> _nodeMap = {};
-
+  int _currentFloor = 1;
   String highlightedCategory = "";
+  late Future<List<Map<String, dynamic>>> _edgesFuture;
 
   @override
   void initState() {
@@ -48,13 +47,15 @@ class _HomeScreenState extends State<HomeScreen> {
         mapController: mapController,
       );
     }
-    final fn = widget.loadGraphDataFn ?? loadGraphData;
-    fn().then((graphData) {
-      setState(() {
-        _edges = graphData['edges'];
-        _nodeMap = graphData['nodeMap'];
-      });
-    });
+    if (widget.loadGraphDataFn != null) {
+      _edgesFuture = widget.loadGraphDataFn!("test");
+    } else {
+      final gatewayService = widget.gatewayService ?? GatewayService();
+      _edgesFuture = gatewayService.getFastestRouteWithCoordinates(
+        "67efbb220b23f5290bff707f",
+        "67efbb220b23f5290bff7080",
+      );
+    }
   }
 
   @visibleForTesting
@@ -73,8 +74,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final List<EdgeSegment> segments = createEdgeSegments(_edges, _nodeMap);
-
     return Scaffold(
       key: scaffoldKey,
       drawer: BurgerDrawer(highlightedCategory: highlightRooms),
@@ -107,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               TileLayer(
                 tileProvider: AssetTileProvider(),
-                urlTemplate: 'assets/tiles/{z}/{x}/{y}.png',
+                urlTemplate: 'assets/tiles/$_currentFloor/{z}/{x}/{y}.png',
                 errorImage: const AssetImage('assets/tiles/no_tile.png'),
                 fallbackUrl: 'assets/tiles/no_tile.png',
               ),
@@ -136,16 +135,28 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       },
                       child: Icon(
-                        room.icon, 
-                        size: _currentZoom * 1.75, 
-                        color: highlighted ? Colors.blue : room.color
+                        room.icon,
+                        size: _currentZoom * 1.75,
+                        color: highlighted ? Colors.blue : room.color,
                       ),
                     ),
                   );
                 }).toList(),
               ),
-
-              if (segments.isNotEmpty) LinePath(segments: segments),
+              FutureBuilder<List<Map<String, dynamic>>>(
+                future: _edgesFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                    return LinePath(pathCoordinates: snapshot.data!);
+                  } else {
+                    return const SizedBox.shrink();
+                  }
+                },
+              ),
               if (userLocationWidget != null) userLocationWidget!,
             ],
           ),
@@ -153,6 +164,53 @@ class _HomeScreenState extends State<HomeScreen> {
             top: 40,
             left: 16,
             child: BurgerMenu(scaffoldKey: scaffoldKey),
+          ),
+          Positioned(
+            bottom: 40,
+            left: 16,
+            child: Column(
+              children: [
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _currentFloor = 3;
+                    });
+                  },
+                  style: TextButton.styleFrom(
+                    shape: const CircleBorder(),
+                    backgroundColor: Colors.blue,
+                    padding: const EdgeInsets.all(20),
+                  ),
+                  child: const Text("Floor 3"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _currentFloor = 2;
+                    });
+                  },
+                  style: TextButton.styleFrom(
+                    shape: const CircleBorder(),
+                    backgroundColor: Colors.blue,
+                    padding: const EdgeInsets.all(20),
+                  ),
+                  child: const Text("Floor 2"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _currentFloor = 1;
+                    });
+                  },
+                  style: TextButton.styleFrom(
+                    shape: const CircleBorder(),
+                    backgroundColor: Colors.blue,
+                    padding: const EdgeInsets.all(20),
+                  ),
+                  child: const Text("Floor 1"),
+                ),
+              ],
+            ),
           ),
           if (!widget.skipUserLocation)
             Positioned(
@@ -173,7 +231,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
         ],
-      ),        
+      ),
     );
   }
 }

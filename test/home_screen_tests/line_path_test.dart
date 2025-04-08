@@ -1,100 +1,116 @@
-import 'package:indoor_crowded_regions_frontend/data/models/graph_models.dart';
 import 'package:indoor_crowded_regions_frontend/ui/screens/home_screen.dart';
 import 'package:indoor_crowded_regions_frontend/ui/widgets/path/line_path.dart';
-
+import 'package:indoor_crowded_regions_frontend/services/gateway_service.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 
-Future<Map<String, dynamic>> mockLoadGraphData() async {
-  return {
-    'edges': <EdgeModel>[
-      EdgeModel(source: 1, target: 2, population: 500),
-      EdgeModel(source: 2, target: 3, population: 1500),
-      EdgeModel(source: 3, target: 4, population: 2000),
-    ],
-    'nodeMap': <int, NodeModel>{
-      1: NodeModel(id: 1, latitude: 55.68875, longitude: 12.577592),
-      2: NodeModel(id: 2, latitude: 55.68875, longitude: 12.577687),
-      3: NodeModel(id: 3, latitude: 55.68875, longitude: 12.577782),
-      4: NodeModel(id: 4, latitude: 55.68875, longitude: 12.577877),
-    },
-  };
+class MockGatewayService extends Mock implements GatewayService {
+  @override
+  noSuchMethod(Invocation invocation, {Object? returnValue, Object? returnValueForMissingStub}) => 
+      super.noSuchMethod(
+        invocation,
+        returnValue: Future.value(<Map<String, dynamic>>[]),
+        returnValueForMissingStub: Future.value(<Map<String, dynamic>>[]),
+      );
 }
 
 void main() {
   testWidgets('Finds a LinePath widget', (WidgetTester tester) async {
-    // Uses mock data to avoid reading from the filesystem
-    await tester.runAsync(() async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: HomeScreenTestWrapper(
-            loadGraphDataOverride: mockLoadGraphData,
-            skipUserLocation: true,
-          ),
-        ),
-      );
-      // Ensures all asynchronous tasks (like your Future) have completed
-      await tester.pumpAndSettle();
-    });
+    final mockGatewayService = MockGatewayService();
 
-    // Verify the LinePath is present in the widget tree
+    when(mockGatewayService.getFastestRouteWithCoordinates("test", "test"))
+        .thenAnswer((_) async => [
+              {"id": "sensor1", "longitude": 12.577325, "latitude": 55.688495},
+              {"id": "sensor2", "longitude": 12.577545, "latitude": 55.688732},
+            ]);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: HomeScreenTestWrapper(
+          skipUserLocation: true,
+          loadGraphDataOverride: (dynamic _) async =>
+              mockGatewayService.getFastestRouteWithCoordinates("test", "test"),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
     expect(find.byType(LinePath), findsOneWidget);
   });
 
   testWidgets('Finds a PolyLineLayer', (WidgetTester tester) async {
-    await tester.runAsync(() async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: HomeScreenTestWrapper(
-            loadGraphDataOverride: mockLoadGraphData,
-            skipUserLocation: true,
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-    });
+    final mockGatewayService = MockGatewayService();
 
-    // Verify that the Polyline widgets are present in the widget tree
+    when(mockGatewayService.getFastestRouteWithCoordinates("test", "test"))
+        .thenAnswer((_) async => [
+              {"id": "sensor1", "longitude": 12.577325, "latitude": 55.688495},
+              {"id": "sensor2", "longitude": 12.577545, "latitude": 55.688732},
+            ]);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: HomeScreenTestWrapper(
+          skipUserLocation: true,
+          loadGraphDataOverride: (_) async =>
+              mockGatewayService.getFastestRouteWithCoordinates("test", "test"),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
     expect(find.byType(PolylineLayer), findsOneWidget);
   });
 
-  testWidgets('Finds the three colors "green, yellow and red"', (WidgetTester tester) async {
-    await tester.runAsync(() async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: HomeScreenTestWrapper(
-            loadGraphDataOverride: mockLoadGraphData,
-            skipUserLocation: true,
-          ),
+  testWidgets('Finds the line path with color blue', (WidgetTester tester) async {
+    final mockGatewayService = MockGatewayService();
+
+    when(mockGatewayService.getFastestRouteWithCoordinates("test", "test"))
+        .thenAnswer((_) async => [
+              {"id": "sensor1", "longitude": 12.577325, "latitude": 55.688495},
+              {"id": "sensor2", "longitude": 12.577545, "latitude": 55.688732},
+              {"id": "sensor3", "longitude": 12.577640, "latitude": 55.688732},
+            ]);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: HomeScreenTestWrapper(
+          skipUserLocation: true,
+          loadGraphDataOverride: (_) async =>
+              mockGatewayService.getFastestRouteWithCoordinates("test", "test"),
         ),
-      );
-      await tester.pumpAndSettle();
-    });
+      ),
+    );
+
+    await tester.pumpAndSettle();
 
     final polylineLayer = tester.widget<PolylineLayer>(find.byType(PolylineLayer));
     final polylines = polylineLayer.polylines;
-    final colors = polylines.map((p) => p.color).toSet();
 
-    expect(colors, contains(Colors.green));
-    expect(colors, contains(Colors.yellow));
-    expect(colors, contains(Colors.red));
+    final colorsUsed = polylines.map((p) => p.color).toSet();
+
+    expect(colorsUsed, contains(Colors.blue));
   });
 }
 
 class HomeScreenTestWrapper extends StatelessWidget {
-  final Future<Map<String, dynamic>> Function()? loadGraphDataOverride;
+  final Future<List<Map<String, dynamic>>> Function(dynamic)? loadGraphDataOverride;
   final bool skipUserLocation;
-  
+
   const HomeScreenTestWrapper({
     super.key,
     this.loadGraphDataOverride,
     this.skipUserLocation = false,
-    });
-  
+  });
+
   @override
   Widget build(BuildContext context) {
-    // Overriding the loadGraphData function in HomeScreen
-    return HomeScreen(loadGraphDataFn: loadGraphDataOverride, skipUserLocation: skipUserLocation);
+    return HomeScreen(
+      loadGraphDataFn: loadGraphDataOverride,
+      skipUserLocation: skipUserLocation,
+    );
   }
 }

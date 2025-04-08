@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AppInitializer {
   static Future<void> initialize() async {
     WidgetsFlutterBinding.ensureInitialized();
-    // Add other initialization tasks here, e.g., loading environment variables, initializing services, etc.
+    await dotenv.load(fileName: ".env");
   }
 }

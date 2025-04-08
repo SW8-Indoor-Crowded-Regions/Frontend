@@ -18,6 +18,8 @@ dependencies:
   location: ^8.0.0
   latlong2: ^0.9.1
   dio: ^5.8.0+1
+  mockito: ^5.4.5
+  flutter_dotenv: ^5.2.1
 
 dev_dependencies:
   flutter_test:
@@ -28,16 +30,37 @@ flutter:
   uses-material-design: true
 
   assets:
+    - .env
     - assets/tiles/
-    - assets/tiles/17/70115/
-    - assets/tiles/17/70116/
-    - assets/tiles/18/140230/
-    - assets/tiles/18/140231/
-    - assets/tiles/18/140232/
-    - assets/tiles/19/280460/
-    - assets/tiles/19/280461/
-    - assets/tiles/19/280462/
-    - assets/tiles/19/280463/
-    - assets/tiles/19/280464/
+    - assets/tiles/1/17/70115/
+    - assets/tiles/1/17/70116/
+    - assets/tiles/1/18/140230/
+    - assets/tiles/1/18/140231/
+    - assets/tiles/1/18/140232/
+    - assets/tiles/1/19/280460/
+    - assets/tiles/1/19/280461/
+    - assets/tiles/1/19/280462/
+    - assets/tiles/1/19/280463/
+    - assets/tiles/1/19/280464/
+    - assets/tiles/2/17/70115/
+    - assets/tiles/2/17/70116/
+    - assets/tiles/2/18/140230/
+    - assets/tiles/2/18/140231/
+    - assets/tiles/2/18/140232/
+    - assets/tiles/2/19/280460/
+    - assets/tiles/2/19/280461/
+    - assets/tiles/2/19/280462/
+    - assets/tiles/2/19/280463/
+    - assets/tiles/2/19/280464/
+    - assets/tiles/3/17/70115/
+    - assets/tiles/3/17/70116/
+    - assets/tiles/3/18/140230/
+    - assets/tiles/3/18/140231/
+    - assets/tiles/3/18/140232/
+    - assets/tiles/3/19/280460/
+    - assets/tiles/3/19/280461/
+    - assets/tiles/3/19/280462/
+    - assets/tiles/3/19/280463/
+    - assets/tiles/3/19/280464/
     - assets/mock_data/graph.json
     

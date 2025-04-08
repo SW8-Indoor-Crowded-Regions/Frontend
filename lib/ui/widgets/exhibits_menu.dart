@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'api_service.dart';
+import '../../services/api_service.dart';
 
 class ExhibitsMenu extends StatefulWidget {
   final void Function(bool show) showExhibitsMenu;
