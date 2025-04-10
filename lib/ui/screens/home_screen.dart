@@ -78,6 +78,49 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.pop(context);
   }
 
+  bool isPointInPolygon(LatLng point, List<LatLng> polygon) {
+    bool isInside = false;
+    int i = 0;
+    int j = polygon.length - 1;
+    // ray-casting algorithm
+    for (i = 0; i < polygon.length; i++) {
+      if (((polygon[i].latitude > point.latitude) !=
+              (polygon[j].latitude > point.latitude)) &&
+          (point.longitude <
+              (polygon[j].longitude - polygon[i].longitude) *
+                      (point.latitude - polygon[i].latitude) /
+                      (polygon[j].latitude - polygon[i].latitude) +
+                  polygon[i].longitude)) {
+        isInside = !isInside;
+      }
+      j = i;
+    }
+    return isInside;
+  }
+
+  void _handleMapTap(TapPosition tapPosition, LatLng point) {
+    for (var polygon in _polygons) {
+      if (isPointInPolygon(point, polygon.points)) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(polygon.name),
+            content: Text('Polygon ID: ${polygon.id}\n'
+                'Tapped at: ${point.latitude.toStringAsFixed(5)}, ${point.longitude.toStringAsFixed(5)}\n'
+                'Additional Data: ${polygon.additionalData}'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Close"),
+              ),
+            ],
+          ),
+        );
+        return;
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,6 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
           FlutterMap(
             mapController: mapController,
             options: MapOptions(
+              onTap: _handleMapTap,
               onMapEvent: (MapEvent event) {
                 if (event is MapEventMoveStart) {
                   userLocationKey.currentState?.updateAlteredMap(true);
@@ -165,22 +209,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               InteractivePolygonLayer(
                 polygons: _polygons,
-                onPolygonTap: (polygon) {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text(polygon.name),
-                      content: Text('Polygon ID: ${polygon.id}\n'
-                          'Additional Data: ${polygon.additionalData}'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text("Close"),
-                        ),
-                      ],
-                    ),
-                  );
-                },
               ),
               if (userLocationWidget != null) userLocationWidget!,
             ],
