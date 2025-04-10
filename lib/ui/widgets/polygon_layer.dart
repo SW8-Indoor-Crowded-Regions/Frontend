@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import '../../models/polygon_area.dart';
+import 'package:latlong2/latlong.dart';
+
 
 class PolygonLayerWidget extends StatelessWidget {
   final List<PolygonArea> polygons;
