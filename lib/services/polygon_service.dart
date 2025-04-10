@@ -11,7 +11,7 @@ class PolygonService {
   Future<List<PolygonArea>> getPolygons({int? floor}) async {
     try {
       final response = await dio.get(
-        "$baseUrl/polygons",
+        "$baseUrl/rooms",
         queryParameters: floor != null ? {"floor": floor} : null,
       );
 
