@@ -29,7 +29,6 @@ class PolygonLayerWidget extends StatelessWidget {
           color: fillColor,
           borderColor: strokeColor,
           borderStrokeWidth: strokeWidth,
-          isFilled: true,
           label: polygon.name,
         );
       }).toList(),
