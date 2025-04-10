@@ -3,8 +3,11 @@ import '../widgets/burger_menu.dart';
 import '../widgets/path/line_path.dart';
 import '../widgets/user_location_widget.dart';
 import '../widgets/burger_drawer.dart';
+import '../widgets/polygon_layer.dart';
 import '../../services/api_service.dart';
 import '../../services/gateway_service.dart';
+import '../../services/polygon_service.dart';
+import '../../models/polygon_area.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -29,6 +32,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final APIService apiService = APIService();
+  final PolygonService polygonService = PolygonService();
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<UserLocationWidgetState> userLocationKey = GlobalKey<UserLocationWidgetState>();
   MapController mapController = MapController();
@@ -37,10 +41,12 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentFloor = 1;
   String highlightedCategory = "";
   late Future<List<Map<String, dynamic>>> _edgesFuture;
+  late List<PolygonArea> _polygons;
 
   @override
   void initState() {
     super.initState();
+    _polygons = polygonService.getMockPolygons();
     if (!widget.skipUserLocation) {
       userLocationWidget = UserLocationWidget(
         key: userLocationKey,
@@ -155,6 +161,25 @@ class _HomeScreenState extends State<HomeScreen> {
                   } else {
                     return const SizedBox.shrink();
                   }
+                },
+              ),
+              InteractivePolygonLayer(
+                polygons: _polygons,
+                onPolygonTap: (polygon) {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text(polygon.name),
+                      content: Text('Polygon ID: ${polygon.id}\n'
+                          'Additional Data: ${polygon.additionalData}'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text("Close"),
+                        ),
+                      ],
+                    ),
+                  );
                 },
               ),
               if (userLocationWidget != null) userLocationWidget!,
