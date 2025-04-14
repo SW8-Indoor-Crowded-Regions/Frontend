@@ -18,7 +18,7 @@ class HomeScreen extends StatefulWidget {
   @visibleForTesting
   final bool skipUserLocation;
   final GatewayService? gatewayService;
-  
+
   const HomeScreen({
     super.key,
     this.loadGraphDataFn,
@@ -41,27 +41,29 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentFloor = 1;
   String highlightedCategory = "";
   late Future<List<Map<String, dynamic>>> _edgesFuture;
+  late Future<List<PolygonArea>> _polygonsFuture = Future.value([]); // Initialize with an empty Future
   late List<PolygonArea> _polygons;
 
   @override
   void initState() {
     super.initState();
-    _polygons = polygonService.getMockPolygons();
+    _polygons = polygonService.getMockPolygons(); // Use the mock data
+    _polygonsFuture = Future.value(_polygons); // Wrap the mock data in a Future
     if (!widget.skipUserLocation) {
       userLocationWidget = UserLocationWidget(
         key: userLocationKey,
         mapController: mapController,
       );
     }
-    if (widget.loadGraphDataFn != null) {
-      _edgesFuture = widget.loadGraphDataFn!("test");
-    } else {
-      final gatewayService = widget.gatewayService ?? GatewayService();
-      _edgesFuture = gatewayService.getFastestRouteWithCoordinates(
-        "67efbb220b23f5290bff707f",
-        "67efbb220b23f5290bff7080",
-      );
-    }
+    // if (widget.loadGraphDataFn != null) {
+    //   _edgesFuture = widget.loadGraphDataFn!("test");
+    // } else {
+    //   final gatewayService = widget.gatewayService ?? GatewayService();
+    //   _edgesFuture = gatewayService.getFastestRouteWithCoordinates(
+    //     "67efbb220b23f5290bff707f",
+    //     "67efbb220b23f5290bff7080",
+    //   );
+    // }
   }
 
   @visibleForTesting
@@ -88,8 +90,8 @@ class _HomeScreenState extends State<HomeScreen> {
               (polygon[j].latitude > point.latitude)) &&
           (point.longitude <
               (polygon[j].longitude - polygon[i].longitude) *
-                      (point.latitude - polygon[i].latitude) /
-                      (polygon[j].latitude - polygon[i].latitude) +
+                  (point.latitude - polygon[i].latitude) /
+                  (polygon[j].latitude - polygon[i].latitude) +
                   polygon[i].longitude)) {
         isInside = !isInside;
       }
@@ -193,22 +195,22 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                 }).toList(),
               ),
-              FutureBuilder<List<Map<String, dynamic>>>(
-                future: _edgesFuture,
+              FutureBuilder<List<PolygonArea>>(
+                future: _polygonsFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                    return LinePath(pathCoordinates: snapshot.data!);
+                    return Center(child: Text('Error loading polygons: ${snapshot.error}'));
+                  } else if (snapshot.hasData) {
+                    _polygons = snapshot.data!;
+                    return InteractivePolygonLayer(
+                      polygons: _polygons,
+                    );
                   } else {
                     return const SizedBox.shrink();
                   }
                 },
-              ),
-              InteractivePolygonLayer(
-                polygons: _polygons,
               ),
               if (userLocationWidget != null) userLocationWidget!,
             ],
@@ -253,6 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: () {
                     setState(() {
                       _currentFloor = 1;
+                      _polygonsFuture = polygonService.getPolygons(floor: _currentFloor); // Reload data for floor 1 (if you still want API call for floor 1)
                     });
                   },
                   style: TextButton.styleFrom(

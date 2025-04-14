@@ -15,15 +15,24 @@ class PolygonArea {
 
   factory PolygonArea.fromJson(Map<String, dynamic> json) {
     return PolygonArea(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      points: (json['coordinates'] as List).map((point) {
+      id: json['_id']?['\$oid'] as String? ?? '', // Access nested ID and handle null
+      name: json['name'] as String? ?? '',       // Handle potential null for name
+      points: (json['borders'] as List?)?.map((point) {
         return LatLng(
-          (point['lat'] as num).toDouble(),
-          (point['lng'] as num).toDouble(),
+          (point[0] as num).toDouble(),
+          (point[1] as num).toDouble(),
         );
-      }).toList(),
-      additionalData: json['additionalData'] as Map<String, dynamic>?,
+      }).toList() ?? [], // Handle potential null for borders
+      additionalData: {
+        'type': json['type'],
+        'crowd_factor': json['crowd_factor'],
+        'popularity_factor': json['popularity_factor'],
+        'occupants': json['occupants'],
+        'area': json['area'],
+        'longitude': json['longitude'],
+        'latitude': json['latitude'],
+        'floor': json['floor'],
+      },
     );
   }
 }
