@@ -4,6 +4,7 @@ import '../widgets/path/line_path.dart';
 import '../widgets/user_location_widget.dart';
 import '../widgets/burger_drawer.dart';
 import '../widgets/polygon_layer.dart';
+import '../widgets/polygon_info_panel.dart';
 import '../../services/api_service.dart';
 import '../../services/gateway_service.dart';
 import '../../services/polygon_service.dart';
@@ -30,31 +31,66 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final APIService apiService = APIService();
   final PolygonService polygonService = PolygonService();
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-  final GlobalKey<UserLocationWidgetState> userLocationKey = GlobalKey<UserLocationWidgetState>();
+  final GlobalKey<UserLocationWidgetState> userLocationKey =
+      GlobalKey<UserLocationWidgetState>();
   MapController mapController = MapController();
   UserLocationWidget? userLocationWidget;
   double _currentZoom = 18.0;
   int _currentFloor = 1;
   String highlightedCategory = "";
   late Future<List<Map<String, dynamic>>> _edgesFuture;
-  late Future<List<PolygonArea>> _polygonsFuture = Future.value([]); // Initialize with an empty Future
-  late List<PolygonArea> _polygons;
+  late Future<List<PolygonArea>> _polygonsFuture =
+      Future.value([]); // Initialize with an empty Future
+  late List<PolygonArea> _polygons = [];
+  PolygonArea? _selectedPolygon;
+  bool _showInfoPanel = false;
+  static const double _panelWidthFraction = 0.7;
+  static const double _maxPanelWidth = 350.0;
 
   @override
   void initState() {
     super.initState();
-    _polygons = polygonService.getMockPolygons(); // Use the mock data
-    _polygonsFuture = Future.value(_polygons); // Wrap the mock data in a Future
+
+    _loadPolygons(_currentFloor);
+
     if (!widget.skipUserLocation) {
       userLocationWidget = UserLocationWidget(
         key: userLocationKey,
         mapController: mapController,
       );
     }
+  }
+
+  void _loadPolygons(int floor) {
+    setState(() {
+      if (floor == 1) {
+        _polygonsFuture = Future.value(polygonService.getPolygons());
+      } else {
+        _polygonsFuture = polygonService.getPolygons(floor: floor);
+      }
+      _selectedPolygon = null;
+      _showInfoPanel = false;
+    });
+    _polygonsFuture.then((data) {
+      if (mounted) {
+        setState(() {
+          _polygons = data;
+        });
+      }
+    }).catchError((error) {
+      print("Error loading polygons: $error");
+      if (mounted) {
+        setState(() {
+          _polygons = [];
+        });
+      }
+    });
+
+    // Uncomment this code if you need to load graph data
     // if (widget.loadGraphDataFn != null) {
     //   _edgesFuture = widget.loadGraphDataFn!("test");
     // } else {
@@ -76,55 +112,59 @@ class _HomeScreenState extends State<HomeScreen> {
   void highlightRooms(String category) {
     setState(() {
       highlightedCategory = (highlightedCategory == category) ? "" : category;
+      _selectedPolygon = null;
     });
     Navigator.pop(context);
   }
 
   bool isPointInPolygon(LatLng point, List<LatLng> polygon) {
+    if (polygon.isEmpty) return false;
     bool isInside = false;
-    int i = 0;
     int j = polygon.length - 1;
     // ray-casting algorithm
-    for (i = 0; i < polygon.length; i++) {
+    for (int i = 0; i < polygon.length; j = i++) {
       if (((polygon[i].latitude > point.latitude) !=
               (polygon[j].latitude > point.latitude)) &&
           (point.longitude <
               (polygon[j].longitude - polygon[i].longitude) *
-                  (point.latitude - polygon[i].latitude) /
-                  (polygon[j].latitude - polygon[i].latitude) +
+                      (point.latitude - polygon[i].latitude) /
+                      (polygon[j].latitude - polygon[i].latitude) +
                   polygon[i].longitude)) {
         isInside = !isInside;
       }
-      j = i;
+      // Removed redundant j = i assignment as it's already handled in the loop
     }
     return isInside;
   }
 
   void _handleMapTap(TapPosition tapPosition, LatLng point) {
+    PolygonArea? tappedPolygon;
     for (var polygon in _polygons) {
       if (isPointInPolygon(point, polygon.points)) {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text(polygon.name),
-            content: Text('Polygon ID: ${polygon.id}\n'
-                'Tapped at: ${point.latitude.toStringAsFixed(5)}, ${point.longitude.toStringAsFixed(5)}\n'
-                'Additional Data: ${polygon.additionalData}'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Close"),
-              ),
-            ],
-          ),
-        );
-        return;
+        tappedPolygon = polygon;
+        break;
       }
     }
+    setState(() {
+      _selectedPolygon = tappedPolygon;
+      _showInfoPanel =
+          tappedPolygon != null; // Show panel if a polygon is selected
+    });
+  }
+
+  void _closePolygonPanel() {
+    setState(() {
+      _selectedPolygon = null;
+      _showInfoPanel = false; // Hide the panel when closed
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final panelWidth = screenWidth * _panelWidthFraction > _maxPanelWidth
+        ? _maxPanelWidth
+        : screenWidth * _panelWidthFraction;
     return Scaffold(
       key: scaffoldKey,
       drawer: BurgerDrawer(highlightedCategory: highlightRooms),
@@ -162,9 +202,39 @@ class _HomeScreenState extends State<HomeScreen> {
                 errorImage: const AssetImage('assets/tiles/no_tile.png'),
                 fallbackUrl: 'assets/tiles/no_tile.png',
               ),
+              FutureBuilder<List<PolygonArea>>(
+                future: _polygonsFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                    _polygons = snapshot.data!;
+                    return PolygonLayer(
+                      polygons: _polygons.map((polygon) {
+                        final isSelected = _selectedPolygon?.id == polygon.id;
+                        return Polygon(
+                          points: polygon.points,
+                          color: isSelected
+                              ? Colors.blue.withOpacity(0.6) // Highlight color
+                              : Colors.green.withOpacity(0.3), // Default color
+                          borderColor: isSelected ? Colors.blue : Colors.green,
+                          borderStrokeWidth: isSelected ? 3.0 : 1.5,
+                        );
+                      }).toList(),
+                    );
+                  } else {
+                    return const SizedBox.shrink();
+                  }
+                },
+              ),
               MarkerLayer(
-                markers: rooms.where((room) => _currentZoom >= room.minZoomThreshold).map((room) {
-                  bool highlighted = highlightedCategory.isNotEmpty && room.name.contains(highlightedCategory);
+                markers: rooms
+                    .where((room) => _currentZoom >= room.minZoomThreshold)
+                    .map((room) {
+                  bool highlighted = highlightedCategory.isNotEmpty &&
+                      room.name.contains(highlightedCategory);
                   return Marker(
                     point: room.location,
                     width: 40,
@@ -195,23 +265,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                 }).toList(),
               ),
-              FutureBuilder<List<PolygonArea>>(
-                future: _polygonsFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error loading polygons: ${snapshot.error}'));
-                  } else if (snapshot.hasData) {
-                    _polygons = snapshot.data!;
-                    return InteractivePolygonLayer(
-                      polygons: _polygons,
-                    );
-                  } else {
-                    return const SizedBox.shrink();
-                  }
-                },
-              ),
+              // Removed duplicate FutureBuilder with undefined InteractivePolygonLayer
               if (userLocationWidget != null) userLocationWidget!,
             ],
           ),
@@ -224,48 +278,32 @@ class _HomeScreenState extends State<HomeScreen> {
             bottom: 40,
             left: 16,
             child: Column(
-              children: [
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      _currentFloor = 3;
-                    });
-                  },
-                  style: TextButton.styleFrom(
-                    shape: const CircleBorder(),
-                    backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.all(20),
-                  ),
-                  child: const Text("Floor 3"),
-                ),
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      _currentFloor = 2;
-                    });
-                  },
-                  style: TextButton.styleFrom(
-                    shape: const CircleBorder(),
-                    backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.all(20),
-                  ),
-                  child: const Text("Floor 2"),
-                ),
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      _currentFloor = 1;
-                      _polygonsFuture = polygonService.getPolygons(floor: _currentFloor); // Reload data for floor 1 (if you still want API call for floor 1)
-                    });
-                  },
-                  style: TextButton.styleFrom(
-                    shape: const CircleBorder(),
-                    backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.all(20),
-                  ),
-                  child: const Text("Floor 1"),
-                ),
-              ],
+              children: [1, 2, 3]
+                  .map((floor) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: TextButton(
+                          onPressed: () {
+                            if (_currentFloor != floor) {
+                              setState(() {
+                                _currentFloor = floor;
+                              });
+                              _loadPolygons(floor);
+                            }
+                          },
+                          style: TextButton.styleFrom(
+                              shape: const CircleBorder(),
+                              backgroundColor: _currentFloor == floor
+                                  ? Colors.blueAccent
+                                  : Colors.blue.withOpacity(0.7),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.all(18),
+                              minimumSize: Size(50, 50)),
+                          child: Text("$floor"),
+                        ),
+                      ))
+                  .toList()
+                  .reversed
+                  .toList(),
             ),
           ),
           if (!widget.skipUserLocation)
@@ -278,14 +316,31 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: Colors.black.withAlpha(80),
                 ),
                 child: IconButton(
-                  icon: const Icon(Icons.my_location, size: 45, color: Colors.white),
+                  icon: const Icon(Icons.my_location,
+                      size: 30, color: Colors.white),
+                  padding: EdgeInsets.all(15),
                   onPressed: () {
                     userLocationKey.currentState?.updateAlteredMap(false);
                     userLocationKey.currentState?.recenterLocation();
                   },
+                  tooltip: 'Recenter Map',
                 ),
               ),
             ),
+          // Bottom sliding panel for polygon info
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            bottom: _showInfoPanel ? 0 : -350, // Slide up from below the screen
+            left: 0,
+            right: 0,
+            child: _selectedPolygon != null
+                ? PolygonInfoPanel(
+                    polygon: _selectedPolygon!,
+                    onClose: _closePolygonPanel,
+                  )
+                : const SizedBox.shrink(),
+          ),
         ],
       ),
     );
