@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../services/api_service.dart';
+import '../components/search_suggestion_list.dart';
+import '../components/artwork_result_list.dart';
+import '../components/search_input_bar.dart';
 
 class ExhibitsMenu extends StatefulWidget {
   final void Function(bool show) showExhibitsMenu;
-  const ExhibitsMenu({super.key, this.showExhibitsMenu = _defaultShowExhibitsMenu});
+  const ExhibitsMenu(
+      {super.key, this.showExhibitsMenu = _defaultShowExhibitsMenu});
   static void _defaultShowExhibitsMenu(bool show) {}
   @override
   State<ExhibitsMenu> createState() => _ExhibitsMenuState();
@@ -13,10 +17,81 @@ class _ExhibitsMenuState extends State<ExhibitsMenu> {
   APIService apiService = APIService();
   bool fetchingArtworks = false;
   List<String> previousSearch = [];
-  List<String> artworks = [];
+  List<dynamic> artworks = [];
+  List<String> suggestions = [];
+  int offset = 0;
+  int rowsPerPage = 10;
+  int totalResults = 0;
+  bool isLoadingMore = false;
+  bool hasMore = true;
 
   void showExhibits(bool show) {
     widget.showExhibitsMenu(show);
+  }
+
+  /// Performs a search for artworks based on the given query.
+  /// ---
+  /// If __[isNewSearch]__ is true, it resets the current search state.
+  ///
+  /// If __[isNewSearch]__ is false, it appends the new results to the existing list.
+  ///
+  /// __[query]__ is the search term entered by the user.
+  ///
+  /// It also updates the state of the widget to reflect the loading status and
+  /// the results.
+  /// If the search is successful, it updates the list of artworks and the
+  /// total number of results. If the search fails, it shows a snackbar with an
+  /// error message.
+  Future<void> _performSearch(String query, {bool isNewSearch = true}) async {
+    if (isNewSearch) {
+      offset = 0;
+      totalResults = 0;
+      artworks.clear();
+      hasMore = true;
+    }
+
+    try {
+      if (!hasMore || isLoadingMore) return;
+
+      setState(() => isLoadingMore = true);
+
+      final response = await apiService.getArtwork(
+        query,
+        rows: rowsPerPage,
+        offset: offset,
+      );
+
+      final List<dynamic> data = response.data?["items"];
+      final int found = response.data?["found"] ?? 0;
+
+      setState(() {
+        totalResults = found;
+        artworks.addAll(data);
+        offset += rowsPerPage;
+        hasMore = artworks.length < totalResults;
+        suggestions = [];
+      });
+
+      if (isNewSearch && !previousSearch.contains(query)) {
+        previousSearch.insert(0, query);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Failed to search for artworks")),
+        );
+      }
+    } finally {
+      setState(() => isLoadingMore = false);
+    }
+  }
+
+  final TextEditingController searchTextController = TextEditingController();
+
+  @override
+  void dispose() {
+    searchTextController.dispose();
+    super.dispose();
   }
 
   @override
@@ -29,78 +104,44 @@ class _ExhibitsMenuState extends State<ExhibitsMenu> {
         ),
         title: const Text("Search Exhibits"),
       ),
-        body: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: <Widget>[
-              SearchAnchor(
-                builder: (BuildContext context, SearchController controller) {
-                  return SearchBar(
-                    controller: controller,
-                    padding: const WidgetStatePropertyAll<EdgeInsets>(
-                      EdgeInsets.symmetric(horizontal: 16.0),
-                    ),
-                    onSubmitted: (query) async {
-                      try {
-                        final response = await apiService.searchArtwork(query);
-                        final List<dynamic> data = response.data;
-                        setState(() {
-                          artworks = List<String>.from(data);
-                        });
-                      } catch (e) {
-                        throw Exception("Failed to search for artworks");
-                      }
-                    },
-                    leading: const Icon(Icons.search),
-                  );
-                },
-                suggestionsBuilder: (BuildContext context, SearchController controller) {
-                  return List<ListTile>.generate(previousSearch.length > 5 ? 5 : previousSearch.length, (int index) {
-                    final String item = previousSearch[index];
-                    return ListTile(
-                      title: Text(item),
-                      onTap: () {
-                        setState(() {
-                          controller.closeView(item);
-                        });
-                      },
-                    );
-                  });
-                },
-              ),
-              Expanded(
-                child: Stack(
-                  children: [
-                    artworks.isEmpty ? const Center(child: Text("No results found"))
-                    : ListView.builder(
-                      itemCount: artworks.length,
-                      itemBuilder: (context, index) {
-                        return FutureBuilder(
-                          future: apiService.getArtwork(artworks[index]),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return const Center(child: Text(""));
-                            }
-                            else if (snapshot.hasError) {
-                              return const Center(child: Text("Error loading artwork"));
-                            } else {
-                              final artwork = snapshot.data?.data[0];
-                              return Card(
-                                child: ListTile(
-                                  title: Text("Room: ${artwork["room"] ?? "Not on display"}"),
-                                  subtitle: Text("Artwork ID: ${artwork["id"]}"),
-                                ),
-                              );
-                            }
-                          },
-                        );
-                      },
-                    ),
-                  ])
-              ),
-            ],
+      body: Stack(
+        children: <Widget>[
+          // Content of the screen, including artworks list
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: <Widget>[
+                SearchInputBar(
+                  controller: searchTextController,
+                  onTap: () => setState(() {
+                    suggestions = previousSearch;
+                  }),
+                  onSubmit: _performSearch,
+                  onChanged: (value) => setState(() {
+                    suggestions = previousSearch
+                        .where((item) =>
+                            item.toLowerCase().contains(value.toLowerCase()))
+                        .toList();
+                  }),
+                ),
+                Expanded(
+                    // List of artworks from the API search
+                    child: ArtworkResultsList(
+                  artworks: artworks,
+                  isLoadingMore: isLoadingMore,
+                  hasMore: hasMore,
+                  loadMore: () => _performSearch(searchTextController.text,
+                      isNewSearch: false),
+                )),
+              ],
+            ),
           ),
-        ),
+          // Search suggestions
+          if (suggestions.isNotEmpty)
+            SearchSuggestionList(
+                suggestions: suggestions, onSelect: _performSearch),
+        ],
+      ),
     );
   }
 }
