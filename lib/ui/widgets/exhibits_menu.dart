@@ -32,11 +32,11 @@ class _ExhibitsMenuState extends State<ExhibitsMenu> {
   /// Performs a search for artworks based on the given query.
   /// ---
   /// If __[isNewSearch]__ is true, it resets the current search state.
-  /// 
+  ///
   /// If __[isNewSearch]__ is false, it appends the new results to the existing list.
-  /// 
+  ///
   /// __[query]__ is the search term entered by the user.
-  /// 
+  ///
   /// It also updates the state of the widget to reflect the loading status and
   /// the results.
   /// If the search is successful, it updates the list of artworks and the
@@ -76,9 +76,11 @@ class _ExhibitsMenuState extends State<ExhibitsMenu> {
         previousSearch.insert(0, query);
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to search for artworks")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Failed to search for artworks")),
+        );
+      }
     } finally {
       setState(() => isLoadingMore = false);
     }
@@ -123,7 +125,7 @@ class _ExhibitsMenuState extends State<ExhibitsMenu> {
                   }),
                 ),
                 Expanded(
-                  // List of artworks from the API search
+                    // List of artworks from the API search
                     child: ArtworkResultsList(
                   artworks: artworks,
                   isLoadingMore: isLoadingMore,
