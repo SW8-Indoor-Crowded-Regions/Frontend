@@ -1,9 +1,8 @@
 import '../widgets/room.dart';
 import '../widgets/burger_menu.dart';
-import '../widgets/path/line_path.dart';
+//import '../widgets/path/line_path.dart';
 import '../widgets/user_location_widget.dart';
 import '../widgets/burger_drawer.dart';
-import '../widgets/polygon_layer.dart';
 import '../widgets/polygon_info_panel.dart';
 import '../../services/api_service.dart';
 import '../../services/gateway_service.dart';
@@ -42,20 +41,37 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   double _currentZoom = 18.0;
   int _currentFloor = 1;
   String highlightedCategory = "";
-  late Future<List<Map<String, dynamic>>> _edgesFuture;
-  late Future<List<PolygonArea>> _polygonsFuture =
-      Future.value([]); // Initialize with an empty Future
+  //late Future<List<Map<String, dynamic>>> _edgesFuture;
+  late Future<List<PolygonArea>> _polygonsFuture = Future.value([]);
   late List<PolygonArea> _polygons = [];
   PolygonArea? _selectedPolygon;
   bool _showInfoPanel = false;
-  static const double _panelWidthFraction = 0.7;
-  static const double _maxPanelWidth = 350.0;
+  //static const double _panelWidthFraction = 0.7;
+  //static const double _maxPanelWidth = 350.0;
+
+  // Animation controller for selected polygon
+  late AnimationController _pulseAnimationController;
+  late Animation<double> _pulseAnimation;
 
   @override
   void initState() {
     super.initState();
 
     _loadPolygons(_currentFloor);
+
+    _pulseAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
+
+    _pulseAnimation = Tween<double>(begin: 0.7, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _pulseAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    _pulseAnimationController.repeat(reverse: true);
 
     if (!widget.skipUserLocation) {
       userLocationWidget = UserLocationWidget(
@@ -65,13 +81,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
   }
 
+  @override
+  void dispose() {
+    _pulseAnimationController.dispose();
+    super.dispose();
+  }
+
   void _loadPolygons(int floor) {
     setState(() {
-      if (floor == 1) {
-        _polygonsFuture = Future.value(polygonService.getPolygons());
-      } else {
-        _polygonsFuture = polygonService.getPolygons(floor: floor);
-      }
+      _polygonsFuture = polygonService.getPolygons(floor: floor);
       _selectedPolygon = null;
       _showInfoPanel = false;
     });
@@ -82,7 +100,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         });
       }
     }).catchError((error) {
-      print("Error loading polygons: $error");
       if (mounted) {
         setState(() {
           _polygons = [];
@@ -132,39 +149,66 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   polygon[i].longitude)) {
         isInside = !isInside;
       }
-      // Removed redundant j = i assignment as it's already handled in the loop
     }
     return isInside;
   }
 
   void _handleMapTap(TapPosition tapPosition, LatLng point) {
+    final floorPolygons = _polygons
+        .where((p) => p.additionalData?['floor'] == _currentFloor)
+        .toList();
+
     PolygonArea? tappedPolygon;
-    for (var polygon in _polygons) {
+    for (var polygon in floorPolygons) {
       if (isPointInPolygon(point, polygon.points)) {
         tappedPolygon = polygon;
         break;
       }
     }
-    setState(() {
-      _selectedPolygon = tappedPolygon;
-      _showInfoPanel =
-          tappedPolygon != null; // Show panel if a polygon is selected
-    });
+
+    if (tappedPolygon != null) {
+      if (_selectedPolygon != null &&
+          _selectedPolygon!.id == tappedPolygon.id) {
+        setState(() {
+          _selectedPolygon = null;
+          _showInfoPanel = false;
+        });
+      } else {
+        setState(() {
+          _selectedPolygon = tappedPolygon;
+          _showInfoPanel = true;
+        });
+
+        final polygonCenter = _calculatePolygonCenter(tappedPolygon.points);
+        mapController.move(polygonCenter, mapController.camera.zoom);
+      }
+    } else {
+      setState(() {
+        _selectedPolygon = null;
+        _showInfoPanel = false;
+      });
+    }
+  }
+
+  LatLng _calculatePolygonCenter(List<LatLng> points) {
+    double lat = 0;
+    double lng = 0;
+    for (var point in points) {
+      lat += point.latitude;
+      lng += point.longitude;
+    }
+    return LatLng(lat / points.length, lng / points.length);
   }
 
   void _closePolygonPanel() {
     setState(() {
       _selectedPolygon = null;
-      _showInfoPanel = false; // Hide the panel when closed
+      _showInfoPanel = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final panelWidth = screenWidth * _panelWidthFraction > _maxPanelWidth
-        ? _maxPanelWidth
-        : screenWidth * _panelWidthFraction;
     return Scaffold(
       key: scaffoldKey,
       drawer: BurgerDrawer(highlightedCategory: highlightRooms),
@@ -210,19 +254,48 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   } else if (snapshot.hasError) {
                     return Center(child: Text('Error: ${snapshot.error}'));
                   } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                    _polygons = snapshot.data!;
-                    return PolygonLayer(
-                      polygons: _polygons.map((polygon) {
-                        final isSelected = _selectedPolygon?.id == polygon.id;
-                        return Polygon(
-                          points: polygon.points,
-                          color: isSelected
-                              ? Colors.blue.withOpacity(0.6) // Highlight color
-                              : Colors.green.withOpacity(0.3), // Default color
-                          borderColor: isSelected ? Colors.blue : Colors.green,
-                          borderStrokeWidth: isSelected ? 3.0 : 1.5,
-                        );
-                      }).toList(),
+                    final floorPolygons = snapshot.data!
+                        .where((polygon) =>
+                            polygon.additionalData?['floor'] == _currentFloor)
+                        .toList();
+
+                    return Stack(
+                      children: [
+                        PolygonLayer(
+                          polygons: floorPolygons
+                              .where((polygon) =>
+                                  _selectedPolygon == null ||
+                                  polygon.id != _selectedPolygon!.id)
+                              .map((polygon) => Polygon(
+                                    points: polygon.points,
+                                    color: Colors.green.withOpacity(0.15),
+                                    borderColor: Colors.green,
+                                    borderStrokeWidth: 1.5,
+                                  ))
+                              .toList(),
+                        ),
+                        if (_selectedPolygon != null)
+                          AnimatedBuilder(
+                            animation: _pulseAnimation,
+                            builder: (context, child) {
+                              if (_selectedPolygon!.points.isEmpty) {
+                                return const SizedBox.shrink();
+                              }
+
+                              return PolygonLayer(
+                                polygons: [
+                                  Polygon(
+                                    points: _selectedPolygon!.points,
+                                    color: Colors.orange.withOpacity(
+                                        0.5 + (_pulseAnimation.value * 0.3)),
+                                    borderColor: Colors.deepOrange,
+                                    borderStrokeWidth: 4.0,
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                      ],
                     );
                   } else {
                     return const SizedBox.shrink();
@@ -265,7 +338,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   );
                 }).toList(),
               ),
-              // Removed duplicate FutureBuilder with undefined InteractivePolygonLayer
               if (userLocationWidget != null) userLocationWidget!,
             ],
           ),
@@ -293,11 +365,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           style: TextButton.styleFrom(
                               shape: const CircleBorder(),
                               backgroundColor: _currentFloor == floor
-                                  ? Colors.blueAccent
-                                  : Colors.blue.withOpacity(0.7),
+                                  ? Colors.orange
+                                  : Colors.grey.withOpacity(0.7),
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.all(18),
-                              minimumSize: Size(50, 50)),
+                              minimumSize: Size(50, 50),
+                              elevation: _currentFloor == floor ? 8 : 2),
                           child: Text("$floor"),
                         ),
                       ))
@@ -318,7 +391,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 child: IconButton(
                   icon: const Icon(Icons.my_location,
                       size: 30, color: Colors.white),
-                  padding: EdgeInsets.all(15),
+                  padding: const EdgeInsets.all(15),
                   onPressed: () {
                     userLocationKey.currentState?.updateAlteredMap(false);
                     userLocationKey.currentState?.recenterLocation();
@@ -327,11 +400,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
               ),
             ),
-          // Bottom sliding panel for polygon info
           AnimatedPositioned(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
-            bottom: _showInfoPanel ? 0 : -350, // Slide up from below the screen
+            bottom: _showInfoPanel ? 0 : -350,
             left: 0,
             right: 0,
             child: _selectedPolygon != null

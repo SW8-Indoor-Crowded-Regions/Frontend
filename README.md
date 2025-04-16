@@ -40,6 +40,9 @@ Run the application (vscode):
 1. Go to main.dart
 2. Press f5
 
+### Notes
+If you are running the application on a mobile device you must run this command in your terminal:
+- adb reverse tcp:8000 tcp:8000
 
 ## Requirements
 - Flutter SDK (latest stable version recommended)
