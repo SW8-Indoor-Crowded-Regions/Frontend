@@ -284,6 +284,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   polygon.id != _selectedPolygon!.id)
                               .map((polygon) => Polygon(
                                     points: polygon.points,
+                                    // The withValues fix does not work BTW, so i have ignored. If it gives troubles later, i will fix.
+                                    // ignore: deprecated_member_use
                                     color: Colors.green.withOpacity(0.15),
                                     borderColor: Colors.green,
                                     borderStrokeWidth: 1.5,
@@ -302,6 +304,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 polygons: [
                                   Polygon(
                                     points: _selectedPolygon!.points,
+                                    // The withValues fix does not work BTW, so i have ignored. If it gives troubles later, i will fix.
+                                    // ignore: deprecated_member_use
                                     color: Colors.orange.withOpacity(
                                         0.5 + (_pulseAnimation.value * 0.3)),
                                     borderColor: Colors.deepOrange,
@@ -396,10 +400,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               shape: const CircleBorder(),
                               backgroundColor: _currentFloor == floor
                                   ? Colors.orange
+                                  // The withValues fix does not work BTW, so i have ignored. If it gives troubles later, i will fix.
+                                  // ignore: deprecated_member_use
                                   : Colors.grey.withOpacity(0.7),
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.all(18),
-                              minimumSize: Size(50, 50),
+                              minimumSize: const Size(50, 50),
                               elevation: _currentFloor == floor ? 8 : 2),
                           child: Text("$floor"),
                         ),
