@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:indoor_crowded_regions_frontend/my_app.dart';
 import 'package:indoor_crowded_regions_frontend/ui/screens/home_screen.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart' as dotenv;
 
 void main() {
   setUpAll(() async {
-    await dotenv.load(fileName: ".env");
+    dotenv.dotenv.testLoad(mergeWith: {'BASE_URL': 'http://localhost:8000'});
   });
 
   testWidgets(

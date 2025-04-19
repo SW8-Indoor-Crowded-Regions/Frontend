@@ -5,7 +5,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart' as dotenv;
 
 class MockGatewayService extends Mock implements GatewayService {
   @override
@@ -20,7 +20,7 @@ class MockGatewayService extends Mock implements GatewayService {
 
 void main() {
   setUpAll(() async {
-    await dotenv.load(fileName: ".env");
+    dotenv.dotenv.testLoad(mergeWith: {'BASE_URL': 'http://localhost:8000'});
   });
 
   testWidgets('Finds a LinePath widget', (WidgetTester tester) async {
