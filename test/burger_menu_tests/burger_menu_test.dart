@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:indoor_crowded_regions_frontend/my_app.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:indoor_crowded_regions_frontend/ui/widgets/exhibits_menu.dart';
 import 'package:indoor_crowded_regions_frontend/ui/widgets/burger_menu.dart';
 
 void main() {
-  testWidgets('MyApp renders HomeScreen and opens Drawer when burger menu is tapped', (WidgetTester tester) async {
+  setUpAll(() async {
+    await dotenv.load(fileName: ".env");
+  });
+
+  testWidgets(
+      'MyApp renders HomeScreen and opens Drawer when burger menu is tapped',
+      (WidgetTester tester) async {
     // Build app and wait for all async operations to complete.
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(const MyApp(isTestMode: true));
     await tester.pumpAndSettle();
 
     // Check that a FlutterMap widget is in the widget tree.
@@ -27,7 +34,8 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Exhibits menu closes when back button is tapped', (WidgetTester tester) async {
+  testWidgets('Exhibits menu closes when back button is tapped',
+      (WidgetTester tester) async {
     bool isExhibitsMenuVisible = true;
 
     await tester.pumpWidget(

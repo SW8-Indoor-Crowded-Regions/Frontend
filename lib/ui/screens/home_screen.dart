@@ -1,6 +1,6 @@
 import '../widgets/room.dart';
 import '../widgets/burger_menu.dart';
-//import '../widgets/path/line_path.dart';
+import '../widgets/path/line_path.dart';
 import '../widgets/user_location_widget.dart';
 import '../widgets/burger_drawer.dart';
 import '../widgets/polygon_info_panel.dart';
@@ -17,12 +17,15 @@ class HomeScreen extends StatefulWidget {
   final Future<List<Map<String, dynamic>>> Function(dynamic)? loadGraphDataFn;
   @visibleForTesting
   final bool skipUserLocation;
+  @visibleForTesting
+  final bool isTestMode;
   final GatewayService? gatewayService;
 
   const HomeScreen({
     super.key,
     this.loadGraphDataFn,
     this.skipUserLocation = false,
+    this.isTestMode = false,
     this.gatewayService,
   });
 
@@ -41,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   double _currentZoom = 18.0;
   int _currentFloor = 1;
   String highlightedCategory = "";
-  //late Future<List<Map<String, dynamic>>> _edgesFuture;
+  late Future<List<Map<String, dynamic>>> _edgesFuture;
   late Future<List<PolygonArea>> _polygonsFuture = Future.value([]);
   late List<PolygonArea> _polygons = [];
   PolygonArea? _selectedPolygon;
@@ -71,12 +74,26 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
     );
 
-    _pulseAnimationController.repeat(reverse: true);
+    if (widget.isTestMode) {
+      // In test mode, don't animate to avoid pumpAndSettle timeouts
+      _pulseAnimationController.value = 0.85; // Set to middle value
+    } else {
+      _pulseAnimationController.repeat(reverse: true);
+    }
 
     if (!widget.skipUserLocation) {
       userLocationWidget = UserLocationWidget(
         key: userLocationKey,
         mapController: mapController,
+      );
+    }
+    if (widget.loadGraphDataFn != null) {
+      _edgesFuture = widget.loadGraphDataFn!("test");
+    } else {
+      final gatewayService = widget.gatewayService ?? GatewayService();
+      _edgesFuture = gatewayService.getFastestRouteWithCoordinates(
+        "67efbb220b23f5290bff707f",
+        "67efbb220b23f5290bff7080",
       );
     }
   }
@@ -85,6 +102,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void dispose() {
     _pulseAnimationController.dispose();
     super.dispose();
+  }
+
+  @visibleForTesting
+  void stopAnimations() {
+    _pulseAnimationController.stop();
   }
 
   void _loadPolygons(int floor) {
@@ -106,17 +128,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         });
       }
     });
-
-    // Uncomment this code if you need to load graph data
-    // if (widget.loadGraphDataFn != null) {
-    //   _edgesFuture = widget.loadGraphDataFn!("test");
-    // } else {
-    //   final gatewayService = widget.gatewayService ?? GatewayService();
-    //   _edgesFuture = gatewayService.getFastestRouteWithCoordinates(
-    //     "67efbb220b23f5290bff707f",
-    //     "67efbb220b23f5290bff7080",
-    //   );
-    // }
   }
 
   @visibleForTesting
@@ -209,6 +220,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    // If in test mode, ensure animations are completed quickly
+    if (widget.isTestMode && _pulseAnimationController.isAnimating) {
+      _pulseAnimationController.stop();
+    }
+
     return Scaffold(
       key: scaffoldKey,
       drawer: BurgerDrawer(highlightedCategory: highlightRooms),
@@ -337,6 +353,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                   );
                 }).toList(),
+              ),
+              FutureBuilder<List<Map<String, dynamic>>>(
+                future: _edgesFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                    return LinePath(pathCoordinates: snapshot.data!);
+                  } else {
+                    return const SizedBox.shrink();
+                  }
+                },
               ),
               if (userLocationWidget != null) userLocationWidget!,
             ],

@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:indoor_crowded_regions_frontend/my_app.dart';
 import 'package:indoor_crowded_regions_frontend/ui/screens/home_screen.dart';
 
 void main() {
-  testWidgets('MyApp renders MaterialApp with correct title, theme and HomeScreen', (WidgetTester tester) async {
+  setUpAll(() async {
+    await dotenv.load(fileName: ".env");
+  });
+
+  testWidgets(
+      'MyApp renders MaterialApp with correct title, theme and HomeScreen',
+      (WidgetTester tester) async {
     // Build MyApp and wait for animations and async operations.
     await tester.pumpWidget(const MyApp());
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
 
     // Verify that MaterialApp is rendered.
     final materialAppFinder = find.byType(MaterialApp);
@@ -24,6 +31,6 @@ void main() {
 
     // Verify that HomeScreen is set as the home widget.
     expect(find.byType(HomeScreen), findsOneWidget);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
   });
 }
