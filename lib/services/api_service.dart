@@ -10,7 +10,7 @@ class APIService {
   Future<Response> searchArtwork(String query) async {
     try {
       Response response;
-      response = await dio.get("search-artwork", queryParameters: {"keys": query});
+      response = await dio.get("/search-artwork", queryParameters: {"keys": query});
       return response;
     } catch (e) {
       ErrorToast.show("Failed to fetch artwork");
@@ -21,7 +21,7 @@ class APIService {
   Future<Response> getArtwork(String query, {int rows = 20, int offset = 0}) async {
     try {
       Response response;
-      response = await dio.get("artwork", queryParameters: {
+      response = await dio.get("/artwork", queryParameters: {
         "keys": query,
         "rows": rows,
         "offset": offset,
