@@ -17,10 +17,7 @@ class PolygonService {
       );
 
       if (response.statusCode == 200) {
-        if (response.data is List) {
-          final List<dynamic> data = response.data as List;
-          return data.map((json) => PolygonArea.fromJson(json)).toList();
-        } else if (response.data is Map) {
+        if (response.data is Map) {
           if (response.data.containsKey('rooms')) {
             final List<dynamic> roomsData = response.data['rooms'] as List;
             return roomsData.map((room) => PolygonArea.fromJson(room)).toList();
