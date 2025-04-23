@@ -1,23 +1,21 @@
 import 'package:flutter/material.dart';
 
 class TopBar extends StatefulWidget {
-  final String title;
   final String? fromRoomName;
   final String? toRoomName;
-  final Function(String?, String?)? onRouteChanged;
   final VoidCallback? onClose;
   final VoidCallback? onFromPressed;
   final VoidCallback? onToPressed;
+  final VoidCallback? onGetDirections;
 
   const TopBar({
     super.key,
-    required this.title,
     this.fromRoomName,
     this.toRoomName,
-    this.onRouteChanged,
     this.onClose,
     this.onFromPressed,
     this.onToPressed,
+    this.onGetDirections,
   });
 
   @override
@@ -31,18 +29,18 @@ class _TopBarState extends State<TopBar> {
   @override
   void initState() {
     super.initState();
-    _fromController = TextEditingController(text: widget.fromRoomName);
-    _toController = TextEditingController(text: widget.toRoomName);
+    _fromController = TextEditingController(text: widget.fromRoomName ?? "Select starting point");
+    _toController = TextEditingController(text: widget.toRoomName ?? "Select destination");
   }
 
   @override
   void didUpdateWidget(TopBar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.fromRoomName != widget.fromRoomName) {
-      _fromController.text = widget.fromRoomName ?? '';
+      _fromController.text = widget.fromRoomName ?? 'Select starting point';
     }
     if (oldWidget.toRoomName != widget.toRoomName) {
-      _toController.text = widget.toRoomName ?? '';
+      _toController.text = widget.toRoomName ?? 'Select destination';
     }
   }
 
@@ -57,30 +55,43 @@ class _TopBarState extends State<TopBar> {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      // ignore: deprecated_member_use
-      color: Colors.white.withOpacity(0.9),
+      decoration: BoxDecoration(
+         color: Colors.white.withOpacity(0.95),
+         borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(16),
+              bottomRight: Radius.circular(16),
+         ),
+         boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+         ],
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                "Route Planner",
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
+               const Text(
+                  "Route Planner",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+               ),
               if (widget.onClose != null)
                 IconButton(
-                  icon: const Icon(Icons.close),
+                  icon: const Icon(Icons.close, color: Colors.black54),
                   onPressed: widget.onClose,
+                  tooltip: "Close Route Planner",
                 ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           _buildRouteInputs(),
         ],
       ),
@@ -96,13 +107,8 @@ class _TopBarState extends State<TopBar> {
           child: AbsorbPointer(
             child: _buildInputField(
               controller: _fromController,
-              label: 'From',
+              hint: 'Select starting point',
               icon: Icons.my_location,
-              onChanged: (value) {
-                if (widget.onRouteChanged != null) {
-                  widget.onRouteChanged!(value, _toController.text);
-                }
-              },
             ),
           ),
         ),
@@ -113,32 +119,24 @@ class _TopBarState extends State<TopBar> {
           child: AbsorbPointer(
             child: _buildInputField(
               controller: _toController,
-              label: 'To',
+              hint: 'Select destination',
               icon: Icons.location_on,
-              onChanged: (value) {
-                if (widget.onRouteChanged != null) {
-                  widget.onRouteChanged!(_fromController.text, value);
-                }
-              },
             ),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 16),
         ElevatedButton.icon(
-          onPressed: () {
-            if (widget.onRouteChanged != null) {
-              widget.onRouteChanged!(_fromController.text, _toController.text);
-            }
-          },
+          onPressed: widget.onGetDirections,
           icon: const Icon(Icons.directions),
           label: const Text("Get Directions"),
           style: ElevatedButton.styleFrom(
             foregroundColor: Colors.white,
-            backgroundColor: Colors.orange.shade800,
+            backgroundColor: Colors.orange.shade700,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
+            elevation: 2,
           ),
         ),
       ],
@@ -147,27 +145,29 @@ class _TopBarState extends State<TopBar> {
 
   Widget _buildInputField({
     required TextEditingController controller,
-    required String label,
+    required String hint,
     required IconData icon,
-    required Function(String) onChanged,
   }) {
     return Container(
+       padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
         color: Colors.grey.shade200,
         borderRadius: BorderRadius.circular(8),
       ),
       child: TextField(
         controller: controller,
-        onChanged: onChanged,
-        readOnly:
-            true, // Make the field read-only to prevent keyboard from showing
-        enableInteractiveSelection: false, // Disable text selection
+        readOnly: true,
+        enableInteractiveSelection: false,
+        style: TextStyle(
+           color: controller.text.startsWith("Select") ? Colors.grey.shade600 : Colors.black87,
+           fontWeight: controller.text.startsWith("Select") ? FontWeight.normal : FontWeight.w500,
+        ),
         decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: Colors.orange.shade800),
-          hintText: label,
+          prefixIcon: Icon(icon, color: Colors.orange.shade700, size: 20),
+          hintText: hint,
+          hintStyle: TextStyle(color: Colors.grey.shade500),
           border: InputBorder.none,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(vertical: 14),
         ),
       ),
     );
