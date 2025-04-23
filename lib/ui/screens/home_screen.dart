@@ -1,4 +1,3 @@
-import '../widgets/room.dart';
 import '../widgets/burger_menu.dart';
 import '../widgets/path/line_path.dart';
 import '../widgets/user_location_widget.dart';
@@ -414,42 +413,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     return const SizedBox.shrink();
                   }
                 },
-              ),
-              MarkerLayer(
-                markers: rooms
-                    .where((room) => _currentZoom >= room.minZoomThreshold)
-                    .map((room) {
-                  bool highlighted = highlightedCategory.isNotEmpty &&
-                      room.name.contains(highlightedCategory);
-                  return Marker(
-                    point: room.location,
-                    width: 40,
-                    height: 40,
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text(room.name),
-                            content: Text(room.description),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: const Text("Close"),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                      child: Icon(
-                        room.icon,
-                        size: _currentZoom * 1.75,
-                        color: highlighted ? Colors.blue : room.color,
-                      ),
-                    ),
-                  );
-                }).toList(),
               ),
               FutureBuilder<List<Map<String, dynamic>>>(
                 future: _edgesFuture,
