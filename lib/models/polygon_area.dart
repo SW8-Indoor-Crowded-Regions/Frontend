@@ -17,7 +17,7 @@ class PolygonArea {
 
   factory PolygonArea.fromJson(Map<String, dynamic> json) {
     return PolygonArea(
-      id: json['_id']?['\$oid'] as String? ?? '', // Access nested ID and handle null
+      id: json['id'] ?? '', // Access nested ID and handle null
       name: json['name'] as String? ?? 'unnamed area', // Handle potential null for name
       type: json['type'] as String? ??'unknown type',
       points: (json['borders'] as List?)?.map((point) {
