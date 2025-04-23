@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:indoor_crowded_regions_frontend/ui/components/error_toast.dart';
 import '../models/polygon_area.dart';
 
 class PolygonService {
@@ -16,24 +17,18 @@ class PolygonService {
         queryParameters: floor != null ? {"floor": floor} : null,
       );
 
-      if (response.statusCode == 200) {
-        if (response.data is Map) {
-          if (response.data.containsKey('rooms')) {
-            final List<dynamic> roomsData = response.data['rooms'] as List;
-            return roomsData.map((room) => PolygonArea.fromJson(room)).toList();
-          } else {
-            throw Exception(
-                'API response Map does not contain expected list key.');
-          }
-        } else {
-          throw Exception(
-              'Unexpected response format: ${response.data.runtimeType}');
+      if (response.statusCode != 200) {
+        if (!response.data?['detail']) {
+          throw Exception("Failed to fetch rooms");
         }
-      } else {
-        throw Exception('Failed to load polygons');
+        ErrorToast.show(response.data['detail']);
       }
+
+      final List<dynamic> roomsData = response.data['rooms'] as List;
+      return roomsData.map((room) => PolygonArea.fromJson(room)).toList();
     } catch (e) {
-      throw Exception('Failed to fetch polygons: $e');
+      ErrorToast.show("Failed to connect to the server. Please check your connection.");
+      return [];
     }
   }
 }
