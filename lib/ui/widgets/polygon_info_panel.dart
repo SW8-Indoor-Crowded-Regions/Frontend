@@ -46,12 +46,21 @@ class PolygonInfoPanel extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Room Details',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.orange.shade800,
-                        ),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      onShowRoute!(polygon.id);
+                    },
+                    icon: const Icon(Icons.alt_route),
+                    label: const Text("Show Route"),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.orange.shade800,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close, color: Colors.orange),
@@ -62,6 +71,13 @@ class PolygonInfoPanel extends StatelessWidget {
               ),
             ),
             const Divider(),
+            Text(
+              'Room Details',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange.shade800,
+                  ),
+            ),
             Flexible(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16.0),
@@ -69,7 +85,6 @@ class PolygonInfoPanel extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _buildInfoRow('ID', polygon.id),
                     _buildInfoRow('Name', polygon.name),
                     _buildInfoRow('Type', polygon.type),
                     if (polygon.additionalData != null) ...[
@@ -78,25 +93,6 @@ class PolygonInfoPanel extends StatelessWidget {
                         polygon.additionalData!['floor']?.toString() ?? 'N/A',
                       ),
                     ],
-                    const SizedBox(height: 20),
-                    Center(
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          onShowRoute!(polygon.id);
-                        },
-                        icon: const Icon(Icons.alt_route),
-                        label: const Text("Show Route"),
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: Colors.orange.shade800,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ),
