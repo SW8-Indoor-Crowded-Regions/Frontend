@@ -56,14 +56,14 @@ class _TopBarState extends State<TopBar> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-         color: Colors.white.withOpacity(0.95),
+         color: Colors.white.withValues(alpha: 0.95),
          borderRadius: const BorderRadius.only(
               bottomLeft: Radius.circular(16),
               bottomRight: Radius.circular(16),
          ),
          boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),

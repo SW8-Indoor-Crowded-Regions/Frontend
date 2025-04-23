@@ -436,11 +436,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 return Polygon(
                                   points: polygon.points,
                                   color: isSelectingOnMap
-                                      ? Colors.blue.withOpacity(0.15)
-                                      : Colors.green.withOpacity(0.1),
+                                      ? Colors.blue.withValues(alpha: 0.15)
+                                      : Colors.green.withValues(alpha: 0.1),
                                   borderColor: isSelectingOnMap
-                                      ? Colors.blueAccent.withOpacity(0.8)
-                                      : Colors.green.shade300.withOpacity(0.7),
+                                      ? Colors.blueAccent.withValues(alpha: 0.8)
+                                      : Colors.green.shade300.withValues(alpha: 0.7),
                                   borderStrokeWidth: isSelectingOnMap ? 2.0 : 1.0,
                                 );
                               }).toList(),
@@ -456,8 +456,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 polygons: [
                                   Polygon(
                                     points: _selectedPolygon!.points,
-                                    color: Colors.orange.withOpacity(
-                                        0.4 + (_pulseAnimation.value * 0.3)),
+                                    color: Colors.orange.withValues(
+                                        alpha: 0.4 + (_pulseAnimation.value * 0.3)),
                                     borderColor: Colors.deepOrange.shade400,
                                     borderStrokeWidth: 3.0,
                                   ),
@@ -519,7 +519,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             shape: const CircleBorder(),
                             backgroundColor: _currentFloor == floor
                                 ? Colors.orange.shade600
-                                : Colors.black.withOpacity(0.5),
+                                : Colors.black.withValues(alpha: 0.5),
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.all(16),
                             minimumSize: const Size(48, 48),
@@ -541,8 +541,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               child: Container(
                  decoration: ShapeDecoration(
                    shape: const CircleBorder(),
-                   color: Colors.black.withOpacity(0.5),
-                   shadows: [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0,2))]
+                   color: Colors.black.withValues(alpha: 0.5),
+                   shadows: const [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0,2))]
                  ),
                  child: IconButton(
                    icon: const Icon(Icons.my_location, size: 28, color: Colors.white),
@@ -596,7 +596,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                    IgnorePointer(
                      ignoring: true,
                      child: Container(
-                       color: Colors.black.withOpacity(0.35),
+                       color: Colors.black.withValues(alpha: 0.35),
                      ),
                    ),
 
