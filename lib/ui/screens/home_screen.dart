@@ -11,7 +11,7 @@ import '../../models/polygon_area.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import '../widgets/top_bar.dart'; // Import your TopBar widget file
+import '../widgets/top_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   @visibleForTesting
@@ -83,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     if (widget.isTestMode) {
       // In test mode, don't animate to avoid pumpAndSettle timeouts
-      _pulseAnimationController.value = 0.85; // Set to middle value
+      _pulseAnimationController.value = 0.85;
     } else {
       _pulseAnimationController.repeat(reverse: true);
     }
@@ -235,7 +235,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         _selectedPolygon = null;
         _showInfoPanel = false;
         if (!_showTopBar) {
-          // Only reset these if we're not in route planning mode
           _selectingFromRoom = false;
           _selectingToRoom = false;
         }
@@ -277,8 +276,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     setState(() {
       _fromRoomName = from;
       _toRoomName = to;
-      // Here you would implement the logic to calculate and display the route
-      // For example, call your routing service with the from and to names
     });
   }
 
@@ -546,7 +543,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   )
                 : const SizedBox.shrink(),
           ),
-          if (_showTopBar) // Conditionally render the TopBar
+          if (_showTopBar)
             Positioned(
               top: 0,
               left: 0,
