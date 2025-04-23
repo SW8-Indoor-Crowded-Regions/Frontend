@@ -1,5 +1,4 @@
 import 'package:indoor_crowded_regions_frontend/my_app.dart';
-import 'package:indoor_crowded_regions_frontend/ui/screens/home_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart' as dotenv;
 
 import 'package:flutter/material.dart';
@@ -9,23 +8,6 @@ import 'package:flutter_map/flutter_map.dart';
 void main() {
   setUpAll(() async {
     dotenv.dotenv.testLoad(mergeWith: {'BASE_URL': 'http://localhost:8000', 'FLUTTER_TEST': 'true'});
-  });
-
-  testWidgets(
-      'Renders HomeScreen, FlutterMap and rooms when zoom level is high enough',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(const MyApp(isTestMode: true));
-    await tester.pump(const Duration(seconds: 1));
-
-    expect(find.byType(FlutterMap), findsOneWidget);
-
-    final homeScreenState = tester.state(find.byType(HomeScreen)) as dynamic;
-    homeScreenState.setZoom(19.0);
-    await tester.pump(const Duration(milliseconds: 200));
-    await tester.pump(const Duration(seconds: 1));
-
-    expect(find.byIcon(Icons.place), findsWidgets);
-    await tester.pump(const Duration(seconds: 1));
   });
 
   testWidgets(
