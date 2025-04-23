@@ -20,7 +20,7 @@ class MockGatewayService extends Mock implements GatewayService {
 
 void main() {
   setUpAll(() async {
-    dotenv.dotenv.testLoad(mergeWith: {'BASE_URL': 'http://localhost:8000'});
+    dotenv.dotenv.testLoad(mergeWith: {'BASE_URL': 'http://localhost:8000', 'FLUTTER_TEST': 'true'});
   });
 
   testWidgets('Finds a LinePath widget', (WidgetTester tester) async {
