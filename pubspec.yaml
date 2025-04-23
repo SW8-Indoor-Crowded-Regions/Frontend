@@ -20,6 +20,7 @@ dependencies:
   dio: ^5.8.0+1
   mockito: ^5.4.5
   flutter_dotenv: ^5.2.1
+  toastification: ^3.0.2
 
 dev_dependencies:
   flutter_test:

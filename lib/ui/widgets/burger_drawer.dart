@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:indoor_crowded_regions_frontend/ui/components/error_toast.dart';
 import 'exhibits_menu.dart';
 
 class BurgerDrawer extends StatefulWidget {
@@ -38,9 +39,10 @@ class BurgerDrawerState extends State<BurgerDrawer> {
                     title: const Text('Bathrooms'),
                     onTap: () => highlightedCategory("Bathroom"),
                   ),
-                  const ListTile(
-                    leading: Icon(Icons.shopping_cart_outlined),
-                    title: Text('Shops'),
+                  ListTile(
+                    leading: const Icon(Icons.shopping_cart_outlined),
+                    title: const Text('Shops'),
+                    onTap: () => ErrorToast.show('Shop is currently not available.'),
                   ),
                   ListTile(
                     leading: const Icon(Icons.food_bank_outlined),
@@ -54,9 +56,10 @@ class BurgerDrawerState extends State<BurgerDrawer> {
                       showExhibitsMenu = true;
                     }),
                   ),
-                  const ListTile(
-                    leading: Icon(Icons.web),
-                    title: Text('Website'),
+                  ListTile(
+                    leading: const Icon(Icons.web),
+                    title: const Text('Website'),
+                    onTap: () => ErrorToast.show('Website is currently not available.'),
                   ),
                 ],
               ),

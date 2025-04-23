@@ -8,14 +8,14 @@ import 'package:indoor_crowded_regions_frontend/ui/widgets/burger_menu.dart';
 
 void main() {
   setUpAll(() async {
-    dotenv.dotenv.testLoad(mergeWith: {'BASE_URL': 'http://localhost:8000'});
+    dotenv.dotenv.testLoad(mergeWith: {'BASE_URL': 'http://localhost:8000', 'FLUTTER_TEST': 'true'});
   });
 
   testWidgets(
       'MyApp renders HomeScreen and opens Drawer when burger menu is tapped',
       (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp(isTestMode: true));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
 
     expect(find.byType(FlutterMap), findsOneWidget);
     final burgerIconFinder = find.byIcon(Icons.menu);
@@ -23,10 +23,10 @@ void main() {
     expect(find.byType(BurgerMenu), findsOneWidget);
 
     await tester.tap(burgerIconFinder);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
     expect(find.text('Bathrooms'), findsOneWidget);
 
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
   });
 
   testWidgets('Exhibits menu closes when back button is tapped',

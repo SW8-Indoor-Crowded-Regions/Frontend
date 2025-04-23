@@ -6,7 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart' as dotenv;
 
 void main() {
   setUpAll(() async {
-    dotenv.dotenv.testLoad(mergeWith: {'BASE_URL': 'http://localhost:8000'});
+    dotenv.dotenv.testLoad(mergeWith: {'BASE_URL': 'http://localhost:8000', 'FLUTTER_TEST': 'true'});
   });
 
   testWidgets(

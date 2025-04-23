@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:indoor_crowded_regions_frontend/ui/components/error_toast.dart';
 
 class GatewayService {
   final dio = Dio();
@@ -21,7 +22,8 @@ class GatewayService {
 
       return sensorsWithCoordinates;
     } catch (e) {
-      throw Exception("Failed to fetch fastest route with error: $e");
+      ErrorToast.show("Failed to fetch fastest path");
+      return [];
     }
   }
 }
