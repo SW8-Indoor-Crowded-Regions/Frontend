@@ -4,11 +4,13 @@ import '../../models/polygon_area.dart';
 class PolygonInfoPanel extends StatelessWidget {
   final PolygonArea polygon;
   final VoidCallback onClose;
+  final void Function(String roomId)? onShowRoute;
 
   const PolygonInfoPanel({
     super.key,
     required this.polygon,
     required this.onClose,
+    required this.onShowRoute,
   });
 
   @override
@@ -45,7 +47,7 @@ class PolygonInfoPanel extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Area Details',
+                    'Room Details',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Colors.orange.shade800,
@@ -72,10 +74,29 @@ class PolygonInfoPanel extends StatelessWidget {
                     _buildInfoRow('Type', polygon.type),
                     if (polygon.additionalData != null) ...[
                       _buildInfoRow(
-                          'Floor',
-                          polygon.additionalData!['floor']?.toString() ??
-                              'N/A'),
+                        'Floor',
+                        polygon.additionalData!['floor']?.toString() ?? 'N/A',
+                      ),
                     ],
+                    const SizedBox(height: 20),
+                    Center(
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          onShowRoute!(polygon.id);
+                        },
+                        icon: const Icon(Icons.alt_route),
+                        label: const Text("Show Route"),
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor: Colors.orange.shade800,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),

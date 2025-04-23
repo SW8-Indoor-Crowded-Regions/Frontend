@@ -11,6 +11,7 @@ import '../../models/polygon_area.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import '../widgets/top_bar.dart'; // Import your TopBar widget file
 
 class HomeScreen extends StatefulWidget {
   @visibleForTesting
@@ -51,6 +52,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _showInfoPanel = false;
   //static const double _panelWidthFraction = 0.7;
   //static const double _maxPanelWidth = 350.0;
+  String? _fromRoomName;
+  String? _toRoomName;
+  bool _showRoutePanel = false;
+  bool _showTopBar = false;
+  bool _selectingFromRoom = false;
+  bool _selectingToRoom = false;
 
   // Animation controller for selected polygon
   late AnimationController _pulseAnimationController;
@@ -92,8 +99,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     } else {
       final gatewayService = widget.gatewayService ?? GatewayService();
       _edgesFuture = gatewayService.getFastestRouteWithCoordinates(
-        "67efbb220b23f5290bff707f",
-        "67efbb220b23f5290bff7080",
+        "67efbb210b23f5290bff703d",
+        "67efbb1f0b23f5290bff6ffa",
       );
     }
   }
@@ -114,6 +121,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       _polygonsFuture = polygonService.getPolygons(floor: floor);
       _selectedPolygon = null;
       _showInfoPanel = false;
+      _showTopBar = false;
     });
     _polygonsFuture.then((data) {
       if (mounted) {
@@ -141,6 +149,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     setState(() {
       highlightedCategory = (highlightedCategory == category) ? "" : category;
       _selectedPolygon = null;
+      _showTopBar = false;
     });
     Navigator.pop(context);
   }
@@ -165,6 +174,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _handleMapTap(TapPosition tapPosition, LatLng point) {
+    print(
+        "Map tapped at: ${point.latitude}, ${point.longitude}"); // Debug print
+
     final floorPolygons = _polygons
         .where((p) => p.additionalData?['floor'] == _currentFloor)
         .toList();
@@ -173,16 +185,41 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     for (var polygon in floorPolygons) {
       if (isPointInPolygon(point, polygon.points)) {
         tappedPolygon = polygon;
+        print("Tapped on polygon: ${polygon.name}"); // Debug print
         break;
       }
     }
 
     if (tappedPolygon != null) {
+      // If we're in "selecting from" mode
+      if (_selectingFromRoom && _showTopBar) {
+        print("Setting from room to: ${tappedPolygon.name}"); // Debug print
+        setState(() {
+          _fromRoomName = tappedPolygon!.name;
+          _selectingFromRoom = false;
+          _showInfoPanel = false;
+        });
+        return;
+      }
+
+      // If we're in "selecting to" mode
+      if (_selectingToRoom && _showTopBar) {
+        print("Setting to room to: ${tappedPolygon.name}"); // Debug print
+        setState(() {
+          _toRoomName = tappedPolygon!.name;
+          _selectingToRoom = false;
+          _showInfoPanel = false;
+        });
+        return;
+      }
+
+      // Normal room selection behavior
       if (_selectedPolygon != null &&
           _selectedPolygon!.id == tappedPolygon.id) {
         setState(() {
           _selectedPolygon = null;
           _showInfoPanel = false;
+          _showTopBar = false;
         });
       } else {
         setState(() {
@@ -197,6 +234,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       setState(() {
         _selectedPolygon = null;
         _showInfoPanel = false;
+        if (!_showTopBar) {
+          // Only reset these if we're not in route planning mode
+          _selectingFromRoom = false;
+          _selectingToRoom = false;
+        }
       });
     }
   }
@@ -215,6 +257,53 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     setState(() {
       _selectedPolygon = null;
       _showInfoPanel = false;
+      _showTopBar = false;
+    });
+  }
+
+  void _handleShowRoute(String roomId) {
+    // Find the room name from the ID
+    final roomName = _selectedPolygon?.name ?? "Unknown Room";
+
+    setState(() {
+      _toRoomName = roomName; // Save destination room name
+      _showRoutePanel = true; // Show the top panel
+      _showTopBar = true; // Show the top bar for route planning
+      _showInfoPanel = false; // Hide the bottom info panel
+    });
+  }
+
+  void _handleRouteChanged(String? from, String? to) {
+    setState(() {
+      _fromRoomName = from;
+      _toRoomName = to;
+      // Here you would implement the logic to calculate and display the route
+      // For example, call your routing service with the from and to names
+    });
+  }
+
+  void _handleFromPressed() {
+    print("From pressed"); // Debug print
+    setState(() {
+      _selectingFromRoom = true;
+      _selectingToRoom = false;
+      _showInfoPanel = false; // Hide the bottom info panel
+    });
+  }
+
+  void _handleToPressed() {
+    print("To pressed"); // Debug print
+    setState(() {
+      _selectingToRoom = true;
+      _selectingFromRoom = false;
+      _showInfoPanel = false; // Hide the bottom info panel
+    });
+  }
+
+  void _closeTopBar() {
+    setState(() {
+      _showTopBar = false;
+      _showRoutePanel = false;
     });
   }
 
@@ -282,15 +371,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               .where((polygon) =>
                                   _selectedPolygon == null ||
                                   polygon.id != _selectedPolygon!.id)
-                              .map((polygon) => Polygon(
-                                    points: polygon.points,
-                                    // The withValues fix does not work BTW, so i have ignored. If it gives troubles later, i will fix.
-                                    // ignore: deprecated_member_use
-                                    color: Colors.green.withOpacity(0.15),
-                                    borderColor: Colors.green,
-                                    borderStrokeWidth: 1.5,
-                                  ))
-                              .toList(),
+                              .map((polygon) {
+                            // Use a different color for polygons when in selection mode
+                            final isSelectionMode =
+                                _selectingFromRoom || _selectingToRoom;
+                            return Polygon(
+                              points: polygon.points,
+                              // The withValues fix does not work BTW, so i have ignored. If it gives troubles later, i will fix.
+                              // ignore: deprecated_member_use
+                              color: isSelectionMode
+                                  ? Colors.blue.withOpacity(0.15)
+                                  : Colors.green.withOpacity(0.15),
+                              borderColor:
+                                  isSelectionMode ? Colors.blue : Colors.green,
+                              borderStrokeWidth: isSelectionMode ? 2.0 : 1.5,
+                            );
+                          }).toList(),
                         ),
                         if (_selectedPolygon != null)
                           AnimatedBuilder(
@@ -446,9 +542,122 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ? PolygonInfoPanel(
                     polygon: _selectedPolygon!,
                     onClose: _closePolygonPanel,
+                    onShowRoute: (roomId) => _handleShowRoute(roomId),
                   )
                 : const SizedBox.shrink(),
           ),
+          if (_showTopBar) // Conditionally render the TopBar
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: SafeArea(
+                child: TopBar(
+                  title: "Route Planner",
+                  fromRoomName: _fromRoomName,
+                  toRoomName: _toRoomName,
+                  onRouteChanged: _handleRouteChanged,
+                  onClose: _closeTopBar,
+                  onFromPressed: _handleFromPressed,
+                  onToPressed: _handleToPressed,
+                ),
+              ),
+            ),
+          // Selection mode overlay
+          if (_selectingFromRoom || _selectingToRoom)
+            Stack(
+              children: [
+                // Semi-transparent overlay that allows taps to pass through
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: Container(
+                      color: Colors.black.withOpacity(0.3),
+                    ),
+                  ),
+                ),
+                // Top tooltip (positioned to not interfere with map taps)
+                Positioned(
+                  top: 80, // Position below the TopBar
+                  left: 0,
+                  right: 0,
+                  child: IgnorePointer(
+                    child: Center(
+                      child: Material(
+                        elevation: 4,
+                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 12),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                _selectingFromRoom
+                                    ? Icons.my_location
+                                    : Icons.location_on,
+                                color: Colors.orange.shade800,
+                              ),
+                              const SizedBox(width: 12),
+                              Flexible(
+                                child: Text(
+                                  _selectingFromRoom
+                                      ? "Tap on a room to set as your starting point"
+                                      : "Tap on a room to set as your destination",
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                // Bottom cancel button (not ignoring pointer events so it can be tapped)
+                Positioned(
+                  bottom:
+                      120, // Position higher to avoid interfering with map taps on rooms
+                  right: 16,
+                  child: Material(
+                    elevation: 4,
+                    borderRadius: BorderRadius.circular(30),
+                    color: Colors.white,
+                    child: InkWell(
+                      onTap: () {
+                        setState(() {
+                          _selectingFromRoom = false;
+                          _selectingToRoom = false;
+                        });
+                      },
+                      borderRadius: BorderRadius.circular(30),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.cancel, color: Colors.red.shade800),
+                            const SizedBox(width: 8),
+                            Text(
+                              "Cancel",
+                              style: TextStyle(
+                                color: Colors.red.shade800,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
         ],
       ),
     );
