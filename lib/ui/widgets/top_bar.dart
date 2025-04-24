@@ -1,21 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:indoor_crowded_regions_frontend/services/gateway_service.dart';
+import 'package:indoor_crowded_regions_frontend/ui/screens/home_screen.dart';
+import 'package:indoor_crowded_regions_frontend/ui/widgets/utils/input_field.dart';
 
 class TopBar extends StatefulWidget {
-  final String? fromRoomName;
-  final String? toRoomName;
+  final Room? fromRoom;
+  final Room? toRoom;
+  final GatewayService? gatewayService;
   final VoidCallback? onClose;
   final VoidCallback? onFromPressed;
   final VoidCallback? onToPressed;
   final VoidCallback? onGetDirections;
+  final Function? setEdgesFuture;
 
   const TopBar({
     super.key,
-    this.fromRoomName,
-    this.toRoomName,
+    this.fromRoom,
+    this.toRoom,
+    this.gatewayService,
     this.onClose,
     this.onFromPressed,
     this.onToPressed,
     this.onGetDirections,
+    this.setEdgesFuture
   });
 
   @override
@@ -25,22 +32,24 @@ class TopBar extends StatefulWidget {
 class _TopBarState extends State<TopBar> {
   late TextEditingController _fromController;
   late TextEditingController _toController;
+  GatewayService? _gatewayService;
 
   @override
   void initState() {
     super.initState();
-    _fromController = TextEditingController(text: widget.fromRoomName ?? "Select starting point");
-    _toController = TextEditingController(text: widget.toRoomName ?? "Select destination");
+    _fromController = TextEditingController(text: widget.fromRoom?.name ?? "Select starting point");
+    _toController = TextEditingController(text: widget.toRoom?.name ?? "Select destination");
+    _gatewayService = widget.gatewayService ?? GatewayService();
   }
 
   @override
   void didUpdateWidget(TopBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.fromRoomName != widget.fromRoomName) {
-      _fromController.text = widget.fromRoomName ?? 'Select starting point';
+    if (oldWidget.fromRoom != widget.fromRoom) {
+      _fromController.text = widget.fromRoom?.name ?? 'Select starting point';
     }
-    if (oldWidget.toRoomName != widget.toRoomName) {
-      _toController.text = widget.toRoomName ?? 'Select destination';
+    if (oldWidget.toRoom != widget.toRoom) {
+      _toController.text = widget.toRoom?.name ?? 'Select destination';
     }
   }
 
@@ -49,6 +58,55 @@ class _TopBarState extends State<TopBar> {
     _fromController.dispose();
     _toController.dispose();
     super.dispose();
+  }
+
+
+  void _fetchRoute() {
+    if (widget.fromRoom?.id != null && widget.toRoom?.id != null) {
+      final res = _gatewayService!.getFastestRouteWithCoordinates(
+        widget.fromRoom!.id!,
+        widget.toRoom!.id!,
+      );
+
+      widget.setEdgesFuture!(res);
+
+       ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Calculating route from ${widget.fromRoom?.name ?? 'Start'} to ${widget.toRoom?.name ?? 'End'}...'),
+          backgroundColor: Colors.blueAccent,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+
+      res.then((routeData) {
+        if (routeData.isNotEmpty && mounted) {
+        } else if (routeData.isEmpty && mounted) {
+             ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                content: Text('Could not find a route between the selected points.'),
+                backgroundColor: Colors.orangeAccent,
+                ),
+            );
+        }
+      }).catchError((error) {
+          if (mounted) {
+               ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                content: Text('Error calculating route: $error'),
+                backgroundColor: Colors.redAccent,
+                ),
+            );
+          }
+      });
+
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select both a starting point and a destination on the map.'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
   }
 
   @override
@@ -105,7 +163,7 @@ class _TopBarState extends State<TopBar> {
           onTap: widget.onFromPressed,
           borderRadius: BorderRadius.circular(8),
           child: AbsorbPointer(
-            child: _buildInputField(
+            child: buildInputField(
               controller: _fromController,
               hint: 'Select starting point',
               icon: Icons.my_location,
@@ -117,7 +175,7 @@ class _TopBarState extends State<TopBar> {
           onTap: widget.onToPressed,
           borderRadius: BorderRadius.circular(8),
           child: AbsorbPointer(
-            child: _buildInputField(
+            child: buildInputField(
               controller: _toController,
               hint: 'Select destination',
               icon: Icons.location_on,
@@ -126,7 +184,7 @@ class _TopBarState extends State<TopBar> {
         ),
         const SizedBox(height: 16),
         ElevatedButton.icon(
-          onPressed: widget.onGetDirections,
+          onPressed: _fetchRoute,
           icon: const Icon(Icons.directions),
           label: const Text("Get Directions"),
           style: ElevatedButton.styleFrom(
@@ -143,33 +201,5 @@ class _TopBarState extends State<TopBar> {
     );
   }
 
-  Widget _buildInputField({
-    required TextEditingController controller,
-    required String hint,
-    required IconData icon,
-  }) {
-    return Container(
-       padding: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: TextField(
-        controller: controller,
-        readOnly: true,
-        enableInteractiveSelection: false,
-        style: TextStyle(
-           color: controller.text.startsWith("Select") ? Colors.grey.shade600 : Colors.black87,
-           fontWeight: controller.text.startsWith("Select") ? FontWeight.normal : FontWeight.w500,
-        ),
-        decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: Colors.orange.shade700, size: 20),
-          hintText: hint,
-          hintStyle: TextStyle(color: Colors.grey.shade500),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 14),
-        ),
-      ),
-    );
-  }
+  
 }
