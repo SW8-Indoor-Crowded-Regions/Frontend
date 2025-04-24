@@ -4,9 +4,9 @@ class LocationButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   const LocationButton({
-    Key? key,
+    super.key,
     required this.onPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

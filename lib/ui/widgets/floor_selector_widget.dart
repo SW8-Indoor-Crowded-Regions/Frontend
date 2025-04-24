@@ -5,10 +5,10 @@ class FloorSelector extends StatelessWidget {
   final Function(int) onFloorChanged;
 
   const FloorSelector({
-    Key? key,
+    super.key,
     required this.currentFloor,
     required this.onFloorChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

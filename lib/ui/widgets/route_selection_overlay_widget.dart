@@ -5,10 +5,10 @@ class RouteSelectionOverlay extends StatelessWidget {
   final VoidCallback onCancel;
 
   const RouteSelectionOverlay({
-    Key? key,
+    super.key,
     required this.selectingFromRoom,
     required this.onCancel,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

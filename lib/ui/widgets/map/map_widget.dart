@@ -19,7 +19,7 @@ class MapWidget extends StatelessWidget {
   final Function(MapCamera, bool) onPositionChanged;
   
   const MapWidget({
-    Key? key,
+    super.key,
     required this.mapController,
     required this.currentFloor,
     required this.polygons,
@@ -31,7 +31,7 @@ class MapWidget extends StatelessWidget {
     this.userLocationWidget,
     required this.onMapEvent,
     required this.onPositionChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
