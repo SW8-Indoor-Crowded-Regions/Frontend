@@ -5,10 +5,12 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart' as dotenv;
 
 class MockGatewayService extends Mock implements GatewayService {
   @override
-  noSuchMethod(Invocation invocation, {Object? returnValue, Object? returnValueForMissingStub}) => 
+  noSuchMethod(Invocation invocation,
+          {Object? returnValue, Object? returnValueForMissingStub}) =>
       super.noSuchMethod(
         invocation,
         returnValue: Future.value(<Map<String, dynamic>>[]),
@@ -17,6 +19,10 @@ class MockGatewayService extends Mock implements GatewayService {
 }
 
 void main() {
+  setUpAll(() async {
+    dotenv.dotenv.testLoad(mergeWith: {'BASE_URL': 'http://localhost:8000', 'FLUTTER_TEST': 'true'});
+  });
+
   testWidgets('Finds a LinePath widget', (WidgetTester tester) async {
     final mockGatewayService = MockGatewayService();
 
@@ -41,7 +47,7 @@ void main() {
     expect(find.byType(LinePath), findsOneWidget);
   });
 
-  testWidgets('Finds a PolyLineLayer', (WidgetTester tester) async {
+  testWidgets('Finds a PolylineLayer', (WidgetTester tester) async {
     final mockGatewayService = MockGatewayService();
 
     when(mockGatewayService.getFastestRouteWithCoordinates("test", "test"))
@@ -65,7 +71,8 @@ void main() {
     expect(find.byType(PolylineLayer), findsOneWidget);
   });
 
-  testWidgets('Finds the line path with color blue', (WidgetTester tester) async {
+  testWidgets('Finds the line path with color blue',
+      (WidgetTester tester) async {
     final mockGatewayService = MockGatewayService();
 
     when(mockGatewayService.getFastestRouteWithCoordinates("test", "test"))
@@ -85,9 +92,13 @@ void main() {
       ),
     );
 
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
 
-    final polylineLayer = tester.widget<PolylineLayer>(find.byType(PolylineLayer));
+    final polylineLayerFinder = find.byType(PolylineLayer);
+    expect(polylineLayerFinder, findsOneWidget);
+
+    final polylineLayer =
+        tester.widget<PolylineLayer>(find.byType(PolylineLayer));
     final polylines = polylineLayer.polylines;
 
     final colorsUsed = polylines.map((p) => p.color).toSet();
@@ -97,7 +108,8 @@ void main() {
 }
 
 class HomeScreenTestWrapper extends StatelessWidget {
-  final Future<List<Map<String, dynamic>>> Function(dynamic)? loadGraphDataOverride;
+  final Future<List<Map<String, dynamic>>> Function(dynamic)?
+      loadGraphDataOverride;
   final bool skipUserLocation;
 
   const HomeScreenTestWrapper({
@@ -111,6 +123,7 @@ class HomeScreenTestWrapper extends StatelessWidget {
     return HomeScreen(
       loadGraphDataFn: loadGraphDataOverride,
       skipUserLocation: skipUserLocation,
+      isTestMode: true,
     );
   }
 }
