@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:indoor_crowded_regions_frontend/services/api_service.dart';
 import '../../models/polygon_area.dart';
 
 class PolygonInfoPanel extends StatelessWidget {
@@ -6,19 +7,31 @@ class PolygonInfoPanel extends StatelessWidget {
   final VoidCallback onClose;
   final void Function(String roomId)? onShowRoute;
 
-  const PolygonInfoPanel({
+  PolygonInfoPanel({
     super.key,
     required this.polygon,
     required this.onClose,
     required this.onShowRoute,
   });
 
+  final APIService apiService = APIService();
+
+  Future<List<dynamic>> _fetchExhibits(String roomId) async {
+    try {
+      final response = await apiService.getArtworksByRoomId(roomId);
+      print(response.data);
+      print(roomId);
+      return response.data['items'] as List<dynamic>;
+    } catch (e) {
+      throw Exception('Failed to load exhibits: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
     final panelHeight =
         screenSize.height * 0.4 > 300 ? 300 : screenSize.height * 0.4;
-
     return Container(
       width: double.infinity,
       height: panelHeight.toDouble(),
@@ -71,28 +84,95 @@ class PolygonInfoPanel extends StatelessWidget {
               ),
             ),
             const Divider(),
-            Text(
-              'Room Details',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.orange.shade800,
-                  ),
-            ),
             Flexible(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16.0),
-                child: Column(
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    _buildInfoRow('Name', polygon.name),
-                    _buildInfoRow('Type', polygon.type),
-                    if (polygon.additionalData != null) ...[
-                      _buildInfoRow(
-                        'Floor',
-                        polygon.additionalData!['floor']?.toString() ?? 'N/A',
+                    Expanded(
+                      flex: 1,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Room Details',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.orange.shade800,
+                                ),
+                          ),
+                          _buildInfoRow('Name', polygon.name),
+                          _buildInfoRow('Type', polygon.type),
+                          if (polygon.additionalData != null) ...[
+                            _buildInfoRow(
+                              'Floor',
+                              polygon.additionalData!['floor']?.toString() ?? 'N/A',
+                            ),
+                          ],
+                        ],
                       ),
-                    ],
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      flex: 1,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Exhibits',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.orange.shade800,
+                                ),
+                          ),
+                          FutureBuilder<List<dynamic>>(
+                            future: _fetchExhibits(polygon.id),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return const Text('Fetching exhibits...', style: TextStyle(fontSize: 16));
+                              } else if (snapshot.hasError) {
+                                return Text('Error: ${snapshot.error}');
+                              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                                return const Text('No exhibits on display.');
+                              } else {
+                                final exhibits = snapshot.data!;
+                                return SizedBox(
+                                  height: 150,
+                                  child: ListView.builder(
+                                    itemCount: exhibits.length,
+                                    itemBuilder: (context, index) {
+                                      final exhibit = exhibits[index];
+
+                                      final title = (exhibit['titles'] as List?)?.isNotEmpty == true
+                                          ? exhibit['titles'][0]['title'] ?? 'Untitled'
+                                          : 'Untitled';
+
+                                      final artist = (exhibit['artist'] as List?)?.isNotEmpty == true
+                                          ? exhibit['artist'][0] ?? 'Unknown artist'
+                                          : 'Unknown artist';
+                                      
+                                      final String thumbnail = exhibit['image_thumbnail'];
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 2.0),
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Expanded(
+                                              child: _buildInfoRow(artist, title, thumbnail),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                );
+                              }
+                            },
+                          )
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -103,7 +183,7 @@ class PolygonInfoPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildInfoRow(String label, String value, [String? thumbnail]) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 6.0),
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
@@ -130,6 +210,18 @@ class PolygonInfoPanel extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ),
+          if (thumbnail != null && thumbnail.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Image.network(
+                thumbnail,
+                width: 40,
+                height: 40,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.broken_image),
+              ),
+            ),
         ],
       ),
     );

@@ -237,7 +237,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       return;
     }
 
-    if (_selectedPolygon!.id == tappedPolygon.id) {
+    if (_selectedPolygon?.id == tappedPolygon.id) {
       setState(() {
         _selectedPolygon = null;
         _showInfoPanel = false;

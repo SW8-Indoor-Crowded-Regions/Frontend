@@ -33,4 +33,18 @@ class APIService {
     }
   }
 
+  Future<Response> getArtworksByRoomId(String query, {int rows = 20, int offset = 0}) async {
+    try {
+      Response response;
+      response = await dio.get("/artwork", queryParameters: {
+        "room": query,
+        "rows": rows,
+        "offset": offset,
+      });
+      return response;
+    } catch (e) {
+      ErrorToast.show("Failed to fetch artworks for room");
+      rethrow;
+    }
+  }
 }
