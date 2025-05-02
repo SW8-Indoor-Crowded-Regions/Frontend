@@ -149,17 +149,14 @@ class PolygonInfoPanel extends StatelessWidget {
                                   itemCount: exhibits.length,
                                   itemBuilder: (context, index) {
                                     final exhibit = exhibits[index];
-
                                     final title = (exhibit['titles'] as List?)?.isNotEmpty == true
                                         ? exhibit['titles'][0]['title'] ?? 'Untitled'
                                         : 'Untitled';
-
                                     final artist = (exhibit['artist'] as List?)?.isNotEmpty == true
-                                        ? exhibit['artist'][0] ?? 'Unknown artist'
-                                        : 'Unknown artist';
-
-                                    final String thumbnail = exhibit['image_thumbnail'];
-                                    final String frontendUrl = exhibit['frontend_url'];
+                                        ? exhibit['artist'][0] ?? 'Unknown'
+                                        : 'Unknown';
+                                    final String? thumbnail = exhibit['image_thumbnail'];
+                                    final String? frontendUrl = exhibit['frontend_url'];
                                     return Padding(
                                       padding: const EdgeInsets.symmetric(vertical: 2.0),
                                       child: Row(
@@ -207,7 +204,7 @@ class PolygonInfoPanel extends StatelessWidget {
       child: Row(
         children: [
           Text(
-            label,
+            label == 'Ubekendt' ? 'Unknown' : label,
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Colors.orange.shade800,
