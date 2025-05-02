@@ -18,19 +18,20 @@ class APIService {
     }
   }
 
-  Future<Response> getArtwork(String query, {int rows = 20, int offset = 0}) async {
+  Future<Response> getArtwork(String query, {int rows = 20, int offset = 0, bool roomIdQuery = false}) async {
     try {
       Response response;
       response = await dio.get("/artwork", queryParameters: {
-        "keys": query,
+        roomIdQuery ? "room" : "keys" : query,
         "rows": rows,
         "offset": offset,
       });
       return response;
     } catch (e) {
-      ErrorToast.show("Failed to fetch artwork");
+      roomIdQuery 
+        ? ErrorToast.show("Failed to fetch artworks for room") 
+        : ErrorToast.show("Failed to fetch artwork");
       rethrow;
     }
   }
-
 }

@@ -1,24 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:indoor_crowded_regions_frontend/services/api_service.dart';
 import '../../models/polygon_area.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PolygonInfoPanel extends StatelessWidget {
   final PolygonArea polygon;
   final VoidCallback onClose;
   final void Function(String roomId)? onShowRoute;
 
-  const PolygonInfoPanel({
+  PolygonInfoPanel({
     super.key,
     required this.polygon,
     required this.onClose,
     required this.onShowRoute,
   });
 
+  final APIService apiService = APIService();
+
+  Future<List<dynamic>> _fetchExhibits(String roomId) async {
+    try {
+      final response = await apiService.getArtwork(roomId, roomIdQuery: true);
+      return response.data['items'] as List<dynamic>;
+    } catch (e) {
+      throw Exception('Failed to load exhibits: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
     final panelHeight =
         screenSize.height * 0.4 > 300 ? 300 : screenSize.height * 0.4;
-
     return Container(
       width: double.infinity,
       height: panelHeight.toDouble(),
@@ -71,30 +83,107 @@ class PolygonInfoPanel extends StatelessWidget {
               ),
             ),
             const Divider(),
-            Text(
-              'Room Details',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.orange.shade800,
-                  ),
-            ),
             Flexible(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildInfoRow('Name', polygon.name),
-                    _buildInfoRow('Type', polygon.type),
-                    if (polygon.additionalData != null) ...[
-                      _buildInfoRow(
-                        'Floor',
-                        polygon.additionalData!['floor']?.toString() ?? 'N/A',
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Room Details',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.orange.shade800,
+                                ),
+                          ),
+                          _buildInfoRow(context, 'Name', polygon.name),
+                          _buildInfoRow(context, 'Type', polygon.type),
+                          if (polygon.additionalData != null) ...[
+                            _buildInfoRow(
+                              context,
+                              'Floor',
+                              polygon.additionalData!['floor']?.toString() ?? 'N/A',
+                            ),
+                          ],
+                        ],
                       ),
-                    ],
-                  ],
-                ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    flex: 1,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Exhibits',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.orange.shade800,
+                                ),
+                          ),
+                          FutureBuilder<List<dynamic>>(
+                            future: _fetchExhibits(polygon.id),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return const Text(
+                                  'Fetching exhibits...',
+                                  style: TextStyle(fontSize: 16),
+                                );
+                              } else if (snapshot.hasError) {
+                                return Text('Error: ${snapshot.error}');
+                              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                                return const Text('No exhibits on display.');
+                              } else {
+                                final exhibits = snapshot.data!;
+                                return ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: exhibits.length,
+                                  itemBuilder: (context, index) {
+                                    final exhibit = exhibits[index];
+                                    final title = (exhibit['titles'] as List?)?.isNotEmpty == true
+                                        ? exhibit['titles'][0]['title'] ?? 'Untitled'
+                                        : 'Untitled';
+                                    final artist = (exhibit['artist'] as List?)?.isNotEmpty == true
+                                        ? exhibit['artist'][0] ?? 'Unknown'
+                                        : 'Unknown';
+                                    final String? thumbnail = exhibit['image_thumbnail'];
+                                    final String? frontendUrl = exhibit['frontend_url'];
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 2.0),
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Expanded(
+                                            child: _buildInfoRow(
+                                              context,
+                                              artist,
+                                              title,
+                                              thumbnail,
+                                              frontendUrl,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                );
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -103,8 +192,8 @@ class PolygonInfoPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
-    return Container(
+  Widget _buildInfoRow(BuildContext context, String label, String value, [String? thumbnail, String? frontendUrl]) {
+    final content = Container(
       margin: const EdgeInsets.symmetric(vertical: 6.0),
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
       decoration: BoxDecoration(
@@ -115,7 +204,7 @@ class PolygonInfoPanel extends StatelessWidget {
       child: Row(
         children: [
           Text(
-            label,
+            label == 'Ubekendt' ? 'Unknown' : label,
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Colors.orange.shade800,
@@ -130,8 +219,46 @@ class PolygonInfoPanel extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ),
+          if (thumbnail != null && thumbnail.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Image.network(
+                thumbnail,
+                width: 40,
+                height: 40,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.broken_image),
+              ),
+            ),
         ],
       ),
     );
+
+    return frontendUrl != null && frontendUrl.isNotEmpty
+      ? GestureDetector(
+        onTap: () async {
+          final open = await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Do you want to open this link?'),
+              content: Text(frontendUrl),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text('Open'),
+                ),
+              ],
+            ),
+          );
+          if (open!) launchUrl(Uri.parse(frontendUrl));
+        },
+        child: content,
+      )
+      : content;
   }
 }
