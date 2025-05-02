@@ -19,7 +19,7 @@ class PolygonInfoPanel extends StatelessWidget {
 
   Future<List<dynamic>> _fetchExhibits(String roomId) async {
     try {
-      final response = await apiService.getArtworksByRoomId(roomId);
+      final response = await apiService.getArtwork(roomId, roomIdQuery: true);
       return response.data['items'] as List<dynamic>;
     } catch (e) {
       throw Exception('Failed to load exhibits: $e');
