@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:indoor_crowded_regions_frontend/ui/widgets/utils/path_beautify.dart';
 
 class LinePath extends StatelessWidget {
   final List<Map<String, dynamic>> pathCoordinates;
@@ -16,7 +17,8 @@ class LinePath extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<LatLng> points = pathCoordinates.map((coord) {
+    final List<Map<String, dynamic>> beautifiedCoordinates = beautifyPath(pathCoordinates);
+    final List<LatLng> points = beautifiedCoordinates.map((coord) {
       return LatLng(coord['latitude'], coord['longitude']);
     }).toList();
 
