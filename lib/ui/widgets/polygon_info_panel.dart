@@ -84,13 +84,13 @@ class PolygonInfoPanel extends StatelessWidget {
             ),
             const Divider(),
             Flexible(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      flex: 1,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -113,9 +113,12 @@ class PolygonInfoPanel extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      flex: 1,
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    flex: 1,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -130,52 +133,60 @@ class PolygonInfoPanel extends StatelessWidget {
                             future: _fetchExhibits(polygon.id),
                             builder: (context, snapshot) {
                               if (snapshot.connectionState == ConnectionState.waiting) {
-                                return const Text('Fetching exhibits...', style: TextStyle(fontSize: 16));
+                                return const Text(
+                                  'Fetching exhibits...',
+                                  style: TextStyle(fontSize: 16),
+                                );
                               } else if (snapshot.hasError) {
                                 return Text('Error: ${snapshot.error}');
                               } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                                 return const Text('No exhibits on display.');
                               } else {
                                 final exhibits = snapshot.data!;
-                                return SizedBox(
-                                  height: 150,
-                                  child: ListView.builder(
-                                    itemCount: exhibits.length,
-                                    itemBuilder: (context, index) {
-                                      final exhibit = exhibits[index];
+                                return ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: exhibits.length,
+                                  itemBuilder: (context, index) {
+                                    final exhibit = exhibits[index];
 
-                                      final title = (exhibit['titles'] as List?)?.isNotEmpty == true
-                                          ? exhibit['titles'][0]['title'] ?? 'Untitled'
-                                          : 'Untitled';
+                                    final title = (exhibit['titles'] as List?)?.isNotEmpty == true
+                                        ? exhibit['titles'][0]['title'] ?? 'Untitled'
+                                        : 'Untitled';
 
-                                      final artist = (exhibit['artist'] as List?)?.isNotEmpty == true
-                                          ? exhibit['artist'][0] ?? 'Unknown artist'
-                                          : 'Unknown artist';
-                                      
-                                      final String thumbnail = exhibit['image_thumbnail'];
-                                      final String frontendUrl = exhibit['frontend_url'];
-                                      return Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 2.0),
-                                        child: Row(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Expanded(
-                                              child: _buildInfoRow(context, artist, title, thumbnail, frontendUrl),
+                                    final artist = (exhibit['artist'] as List?)?.isNotEmpty == true
+                                        ? exhibit['artist'][0] ?? 'Unknown artist'
+                                        : 'Unknown artist';
+
+                                    final String thumbnail = exhibit['image_thumbnail'];
+                                    final String frontendUrl = exhibit['frontend_url'];
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 2.0),
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Expanded(
+                                            child: _buildInfoRow(
+                                              context,
+                                              artist,
+                                              title,
+                                              thumbnail,
+                                              frontendUrl,
                                             ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                  ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
                                 );
                               }
                             },
-                          )
+                          ),
                         ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ],
