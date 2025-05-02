@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:indoor_crowded_regions_frontend/services/api_service.dart';
 import '../../models/polygon_area.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PolygonInfoPanel extends StatelessWidget {
   final PolygonArea polygon;
@@ -19,8 +20,6 @@ class PolygonInfoPanel extends StatelessWidget {
   Future<List<dynamic>> _fetchExhibits(String roomId) async {
     try {
       final response = await apiService.getArtworksByRoomId(roomId);
-      print(response.data);
-      print(roomId);
       return response.data['items'] as List<dynamic>;
     } catch (e) {
       throw Exception('Failed to load exhibits: $e');
@@ -102,10 +101,11 @@ class PolygonInfoPanel extends StatelessWidget {
                                   color: Colors.orange.shade800,
                                 ),
                           ),
-                          _buildInfoRow('Name', polygon.name),
-                          _buildInfoRow('Type', polygon.type),
+                          _buildInfoRow(context, 'Name', polygon.name),
+                          _buildInfoRow(context, 'Type', polygon.type),
                           if (polygon.additionalData != null) ...[
                             _buildInfoRow(
+                              context,
                               'Floor',
                               polygon.additionalData!['floor']?.toString() ?? 'N/A',
                             ),
@@ -153,13 +153,14 @@ class PolygonInfoPanel extends StatelessWidget {
                                           : 'Unknown artist';
                                       
                                       final String thumbnail = exhibit['image_thumbnail'];
+                                      final String frontendUrl = exhibit['frontend_url'];
                                       return Padding(
                                         padding: const EdgeInsets.symmetric(vertical: 2.0),
                                         child: Row(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Expanded(
-                                              child: _buildInfoRow(artist, title, thumbnail),
+                                              child: _buildInfoRow(context, artist, title, thumbnail, frontendUrl),
                                             ),
                                           ],
                                         ),
@@ -183,8 +184,8 @@ class PolygonInfoPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(String label, String value, [String? thumbnail]) {
-    return Container(
+  Widget _buildInfoRow(BuildContext context, String label, String value, [String? thumbnail, String? frontendUrl]) {
+    final content = Container(
       margin: const EdgeInsets.symmetric(vertical: 6.0),
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
       decoration: BoxDecoration(
@@ -225,5 +226,31 @@ class PolygonInfoPanel extends StatelessWidget {
         ],
       ),
     );
+
+    return frontendUrl != null && frontendUrl.isNotEmpty
+      ? GestureDetector(
+        onTap: () async {
+          final open = await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Do you want to open this link?'),
+              content: Text(frontendUrl),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text('Open'),
+                ),
+              ],
+            ),
+          );
+          if (open!) launchUrl(Uri.parse(frontendUrl));
+        },
+        child: content,
+      )
+      : content;
   }
 }
