@@ -84,10 +84,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     _pulseAnimationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 800),
     );
 
-    _pulseAnimation = Tween<double>(begin: 0.7, end: 1.0).animate(
+    _pulseAnimation = Tween<double>(begin: 0.4, end: 1.0).animate(
       CurvedAnimation(
         parent: _pulseAnimationController,
         curve: Curves.easeInOut,
@@ -209,7 +209,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       });
       return;
     }
-
 
     if (_selectingFromRoom) {
       setState(() {
@@ -386,6 +385,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 userLocationWidget: userLocationWidget,
                 onMapEvent: _handleMapEvent,
                 onPositionChanged: _handlePositionChanged,
+                fromRoom: _fromRoom,
+                toRoom: _toRoom,
               );
             },
           ),
