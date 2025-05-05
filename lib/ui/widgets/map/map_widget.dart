@@ -61,23 +61,15 @@ class _MapWidgetState extends State<MapWidget> {
     PolygonArea? toRoomPolygon;
 
     if (widget.fromRoom != null) {
-      try {
-        fromRoomPolygon = floorPolygons.firstWhere(
-          (polygon) => polygon.id == widget.fromRoom!.id,
-        );
-      } catch (e) {
-        // Room not found on current floor
-      }
+      fromRoomPolygon = floorPolygons.firstWhere(
+        (polygon) => polygon.id == widget.fromRoom!.id,
+      );
     }
 
     if (widget.toRoom != null) {
-      try {
-        toRoomPolygon = floorPolygons.firstWhere(
-          (polygon) => polygon.id == widget.toRoom!.id,
-        );
-      } catch (e) {
-        // Room not found on current floor
-      }
+      toRoomPolygon = floorPolygons.firstWhere(
+        (polygon) => polygon.id == widget.toRoom!.id,
+      );
     }
 
     return FlutterMap(
@@ -275,12 +267,12 @@ class _MapWidgetState extends State<MapWidget> {
                       Shadow(
                         offset: const Offset(1.0, 1.0),
                         blurRadius: 3.0,
-                        color: Colors.black.withOpacity(0.8),
+                        color: Colors.black.withValues(alpha: 0.8),
                       ),
                       Shadow(
                         offset: const Offset(-0.5, -0.5),
                         blurRadius: 2.0,
-                        color: Colors.black.withOpacity(0.8),
+                        color: Colors.black.withValues(alpha: 0.8),
                       ),
                     ],
                   ),
