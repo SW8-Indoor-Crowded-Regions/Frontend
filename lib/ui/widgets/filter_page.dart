@@ -68,13 +68,10 @@ class _FilterPageState extends State<FilterPage> {
     });
   }
 
-
   Future<void> _confirmFilters() async {
     try {
       final List<Map<String, dynamic>> filtersPayload = selectedFilters.entries
-          .where((entry) =>
-              (entry.key == "creator" || entry.key == "material") &&
-              entry.value.isNotEmpty)
+          .where((entry) => entry.value.isNotEmpty)
           .map((entry) => {
                 "type": entry.key,
                 "keys": List<String>.from(entry.value),

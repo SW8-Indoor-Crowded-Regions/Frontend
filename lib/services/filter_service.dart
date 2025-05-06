@@ -17,9 +17,9 @@ class FilterService {
     }
   }
 
-  Future<Response> getRoomsFromFilters(Map<String, dynamic> filtersPayload) async {
+  Future<Response> getRoomsFromFilters(Map<String, dynamic> filters) async {
     try {
-      Response response = await dio.post("/rooms", data: filtersPayload);
+      Response response = await dio.post("/filters/rooms", data: filters);
       return response;
     } catch (e) {
       ErrorToast.show("Failed to fetch rooms from filters");
