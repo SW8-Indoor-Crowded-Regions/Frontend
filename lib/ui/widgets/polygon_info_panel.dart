@@ -3,7 +3,7 @@ import 'package:indoor_crowded_regions_frontend/services/api_service.dart';
 import '../../models/polygon_area.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class PolygonInfoPanel extends StatelessWidget {
+class PolygonInfoPanel extends StatefulWidget {
   final PolygonArea polygon;
   final VoidCallback onClose;
   final void Function(String roomId)? onShowRoute;
@@ -14,6 +14,30 @@ class PolygonInfoPanel extends StatelessWidget {
     required this.onClose,
     required this.onShowRoute,
   });
+
+  @override
+  PolygonInfoPanelState createState() => PolygonInfoPanelState();
+}
+
+class PolygonInfoPanelState extends State<PolygonInfoPanel> {
+  late Future<List<dynamic>> _exhibitFuture;
+  late String _lastPolygonId;
+
+  @override
+  void initState() {
+    super.initState();
+    _lastPolygonId = widget.polygon.id;
+    _exhibitFuture = _fetchExhibits(_lastPolygonId);
+  }
+
+  @override
+  void didUpdateWidget(covariant PolygonInfoPanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.polygon.id != _lastPolygonId) {
+      _lastPolygonId = widget.polygon.id;
+      _exhibitFuture = _fetchExhibits(_lastPolygonId);
+    }
+  }
 
   final APIService apiService = APIService();
 
@@ -60,7 +84,7 @@ class PolygonInfoPanel extends StatelessWidget {
                 children: [
                   ElevatedButton.icon(
                     onPressed: () {
-                      onShowRoute!(polygon.id);
+                      widget.onShowRoute!(widget.polygon.id);
                     },
                     icon: const Icon(Icons.alt_route),
                     label: const Text("Show Route"),
@@ -76,7 +100,7 @@ class PolygonInfoPanel extends StatelessWidget {
                   ),
                   IconButton(
                     icon: const Icon(Icons.close, color: Colors.orange),
-                    onPressed: onClose,
+                    onPressed: widget.onClose,
                     tooltip: 'Close Panel',
                   ),
                 ],
@@ -101,13 +125,13 @@ class PolygonInfoPanel extends StatelessWidget {
                                   color: Colors.orange.shade800,
                                 ),
                           ),
-                          _buildInfoRow(context, 'Name', polygon.name),
-                          _buildInfoRow(context, 'Type', polygon.type),
-                          if (polygon.additionalData != null) ...[
+                          _buildInfoRow(context, 'Name', widget.polygon.name),
+                          _buildInfoRow(context, 'Type', widget.polygon.type),
+                          if (widget.polygon.additionalData != null) ...[
                             _buildInfoRow(
                               context,
                               'Floor',
-                              polygon.additionalData!['floor']?.toString() ?? 'N/A',
+                              widget.polygon.additionalData!['floor']?.toString() ?? 'N/A',
                             ),
                           ],
                         ],
@@ -130,7 +154,7 @@ class PolygonInfoPanel extends StatelessWidget {
                                 ),
                           ),
                           FutureBuilder<List<dynamic>>(
-                            future: _fetchExhibits(polygon.id),
+                            future: _exhibitFuture,
                             builder: (context, snapshot) {
                               if (snapshot.connectionState == ConnectionState.waiting) {
                                 return const Text(
