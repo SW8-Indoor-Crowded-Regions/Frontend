@@ -103,37 +103,61 @@ class _ExhibitsMenuState extends State<ExhibitsMenu> {
           onPressed: () => showExhibits(false),
         ),
         title: const Text("Search Exhibits"),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.orange.shade800,
+        elevation: 2,
       ),
       body: Stack(
         children: <Widget>[
           // Content of the screen, including artworks list
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: <Widget>[
-                SearchInputBar(
-                  controller: searchTextController,
-                  onTap: () => setState(() {
-                    suggestions = previousSearch;
-                  }),
-                  onSubmit: _performSearch,
-                  onChanged: (value) => setState(() {
-                    suggestions = previousSearch
-                        .where((item) =>
-                            item.toLowerCase().contains(value.toLowerCase()))
-                        .toList();
-                  }),
-                ),
-                Expanded(
+          Container(
+            color: Colors.grey.shade50,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: <Widget>[
+                  SearchInputBar(
+                    controller: searchTextController,
+                    onTap: () => setState(() {
+                      suggestions = previousSearch;
+                    }),
+                    onSubmit: _performSearch,
+                    onChanged: (value) => setState(() {
+                      suggestions = previousSearch
+                          .where((item) =>
+                              item.toLowerCase().contains(value.toLowerCase()))
+                          .toList();
+                    }),
+                  ),
+                  const SizedBox(height: 8),
+                  // Title for the results section
+                  if (artworks.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 4.0),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Exhibits',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.orange.shade800,
+                          ),
+                        ),
+                      ),
+                    ),
+                  Expanded(
                     // List of artworks from the API search
                     child: ArtworkResultsList(
-                  artworks: artworks,
-                  isLoadingMore: isLoadingMore,
-                  hasMore: hasMore,
-                  loadMore: () => _performSearch(searchTextController.text,
-                      isNewSearch: false),
-                )),
-              ],
+                      artworks: artworks,
+                      isLoadingMore: isLoadingMore,
+                      hasMore: hasMore,
+                      loadMore: () => _performSearch(searchTextController.text,
+                          isNewSearch: false),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           // Search suggestions
