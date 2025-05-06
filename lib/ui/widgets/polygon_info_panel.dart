@@ -8,7 +8,7 @@ class PolygonInfoPanel extends StatefulWidget {
   final VoidCallback onClose;
   final void Function(String roomId)? onShowRoute;
 
-  PolygonInfoPanel({
+  const PolygonInfoPanel({
     super.key,
     required this.polygon,
     required this.onClose,
