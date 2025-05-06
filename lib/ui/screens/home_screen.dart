@@ -387,6 +387,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 onPositionChanged: _handlePositionChanged,
                 fromRoom: _fromRoom,
                 toRoom: _toRoom,
+                highlightedCategory: highlightedCategory,
               );
             },
           ),

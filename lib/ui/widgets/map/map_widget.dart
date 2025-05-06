@@ -21,6 +21,7 @@ class MapWidget extends StatefulWidget {
   final Function(MapCamera, bool) onPositionChanged;
   final Room? fromRoom;
   final Room? toRoom;
+  final String highlightedCategory;
 
   const MapWidget({
     super.key,
@@ -37,6 +38,7 @@ class MapWidget extends StatefulWidget {
     required this.onPositionChanged,
     this.fromRoom,
     this.toRoom,
+    required this.highlightedCategory,
   });
 
   @override
@@ -111,10 +113,10 @@ class _MapWidgetState extends State<MapWidget> {
                   points: polygon.points,
                   color: widget.isSelectingOnMap
                       ? Colors.blue.withValues(alpha: 0.15)
-                      : Colors.white.withValues(alpha: 0.15),
+                      : polygon.type == widget.highlightedCategory ? Colors.orange.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.15),
                   borderColor: widget.isSelectingOnMap
                       ? Colors.blueAccent.withValues(alpha: 0.8)
-                      : Colors.white.withValues(alpha: 0.6),
+                      : polygon.type == widget.highlightedCategory ? Colors.orange.withValues(alpha: 0.60) : Colors.white.withValues(alpha: 0.6),
                   borderStrokeWidth: widget.isSelectingOnMap ? 2.0 : 1.0,
                 );
               }).toList(),

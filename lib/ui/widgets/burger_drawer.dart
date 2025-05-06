@@ -37,17 +37,17 @@ class BurgerDrawerState extends State<BurgerDrawer> {
                   ListTile(
                     leading: const Icon(Icons.wc_rounded),
                     title: const Text('Bathrooms'),
-                    onTap: () => highlightedCategory("Bathroom"),
+                    onTap: () => highlightedCategory("BATHROOM"),
                   ),
                   ListTile(
                     leading: const Icon(Icons.shopping_cart_outlined),
                     title: const Text('Shops'),
-                    onTap: () => ErrorToast.show('Shop is currently not available.'),
+                    onTap: () => highlightedCategory("SHOP"),
                   ),
                   ListTile(
                     leading: const Icon(Icons.food_bank_outlined),
                     title: const Text('Food'),
-                    onTap: () => highlightedCategory("Cafeteria"),
+                    onTap: () => highlightedCategory("FOOD"),
                   ),
                   ListTile(
                     leading: const Icon(Icons.location_on_outlined),
