@@ -3,6 +3,7 @@ import '../../services/api_service.dart';
 import '../components/search_suggestion_list.dart';
 import '../components/artwork_result_list.dart';
 import '../components/search_input_bar.dart';
+import 'filter_page.dart';
 
 class ExhibitsMenu extends StatefulWidget {
   final void Function(bool show) showExhibitsMenu;
@@ -24,6 +25,8 @@ class _ExhibitsMenuState extends State<ExhibitsMenu> {
   int totalResults = 0;
   bool isLoadingMore = false;
   bool hasMore = true;
+  bool showingFilterPage = false;
+
 
   void showExhibits(bool show) {
     widget.showExhibitsMenu(show);
@@ -100,48 +103,67 @@ class _ExhibitsMenuState extends State<ExhibitsMenu> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.chevron_left),
-          onPressed: () => showExhibits(false),
+          onPressed: () {
+            if (showingFilterPage) {
+              setState(() {
+                showingFilterPage = false;
+              });
+            } else {
+              showExhibits(false);
+            }
+          },
         ),
-        title: const Text("Search Exhibits"),
+        title: Text(showingFilterPage ? "Select Filters" : "Search Exhibits"),
       ),
-      body: Stack(
-        children: <Widget>[
-          // Content of the screen, including artworks list
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
+      body: showingFilterPage
+          ? const FilterPage()
+          : Stack(
               children: <Widget>[
-                SearchInputBar(
-                  controller: searchTextController,
-                  onTap: () => setState(() {
-                    suggestions = previousSearch;
-                  }),
-                  onSubmit: _performSearch,
-                  onChanged: (value) => setState(() {
-                    suggestions = previousSearch
-                        .where((item) =>
-                            item.toLowerCase().contains(value.toLowerCase()))
-                        .toList();
-                  }),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: <Widget>[
+                      SearchInputBar(
+                        controller: searchTextController,
+                        onTap: () => setState(() {
+                          suggestions = previousSearch;
+                        }),
+                        onSubmit: _performSearch,
+                        onChanged: (value) => setState(() {
+                          suggestions = previousSearch
+                              .where((item) => item
+                                  .toLowerCase()
+                                  .contains(value.toLowerCase()))
+                              .toList();
+                        }),
+                      ),
+                      const SizedBox(height: 8.0),
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            showingFilterPage = true;
+                          });
+                        },
+                        child: const Text('Filtered search'),
+                      ),
+                      Expanded(
+                        child: ArtworkResultsList(
+                          artworks: artworks,
+                          isLoadingMore: isLoadingMore,
+                          hasMore: hasMore,
+                          loadMore: () => _performSearch(
+                              searchTextController.text,
+                              isNewSearch: false),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                Expanded(
-                    // List of artworks from the API search
-                    child: ArtworkResultsList(
-                  artworks: artworks,
-                  isLoadingMore: isLoadingMore,
-                  hasMore: hasMore,
-                  loadMore: () => _performSearch(searchTextController.text,
-                      isNewSearch: false),
-                )),
+                if (suggestions.isNotEmpty)
+                  SearchSuggestionList(
+                      suggestions: suggestions, onSelect: _performSearch),
               ],
             ),
-          ),
-          // Search suggestions
-          if (suggestions.isNotEmpty)
-            SearchSuggestionList(
-                suggestions: suggestions, onSelect: _performSearch),
-        ],
-      ),
     );
   }
 }
