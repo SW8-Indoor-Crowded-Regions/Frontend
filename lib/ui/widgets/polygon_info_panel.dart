@@ -69,7 +69,7 @@ class PolygonInfoPanel extends StatelessWidget {
                     children: [
                       Text(
                         polygon.name,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Color(0xFFFF7D00), // Brighter orange
                           fontSize: 16,
@@ -112,7 +112,7 @@ class PolygonInfoPanel extends StatelessWidget {
               label: const Text("Show Route"),
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.white,
-                backgroundColor: Color(0xFFFF7D00), // Brighter orange
+                backgroundColor: const Color(0xFFFF7D00), // Brighter orange
                 padding:
                     const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
                 shape: RoundedRectangleBorder(
@@ -136,7 +136,7 @@ class PolygonInfoPanel extends StatelessWidget {
                     'Exhibits',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFFFF7D00), // Brighter orange
+                          color: const Color(0xFFFF7D00), // Brighter orange
                         ),
                   ),
                   // Use SizedBox with zero height to eliminate any default spacing

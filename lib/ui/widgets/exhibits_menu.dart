@@ -133,8 +133,8 @@ class _ExhibitsMenuState extends State<ExhibitsMenu> {
                   const SizedBox(height: 8),
                   // Title for the results section
                   if (artworks.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 4.0),
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 4.0),
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
@@ -142,7 +142,7 @@ class _ExhibitsMenuState extends State<ExhibitsMenu> {
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: const Color(
+                            color: Color(
                                 0xFFFF7D00), // Brighter orange for dark mode
                           ),
                         ),

@@ -29,13 +29,13 @@ class SearchInputBar extends StatelessWidget {
           leading: const Icon(Icons.search,
               color: Color(0xFFFF7D00)), // Brighter orange for dark mode
           hintText: "Search for artworks",
-          backgroundColor: const MaterialStatePropertyAll<Color>(
+          backgroundColor: const WidgetStatePropertyAll<Color>(
               Color(0xFF2D2D2D)), // Dark background for search bar
-          overlayColor: const MaterialStatePropertyAll<Color>(
+          overlayColor: const WidgetStatePropertyAll<Color>(
               Color(0xFF1E1E1E)), // Dark background for overlay
-          textStyle: const MaterialStatePropertyAll<TextStyle>(
+          textStyle: const WidgetStatePropertyAll<TextStyle>(
               TextStyle(color: Colors.white70)), // Light text for dark mode
-          hintStyle: const MaterialStatePropertyAll<TextStyle>(TextStyle(
+          hintStyle: const WidgetStatePropertyAll<TextStyle>(TextStyle(
               color: Color(
                   0xFFBDBDBD))), // Lighter gray for visibility (equivalent to Colors.grey.shade400)
         );
