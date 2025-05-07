@@ -5,17 +5,41 @@ import '../../models/polygon_area.dart';
 import '../components/exhibit_card.dart';
 import '../components/exhibit_detail_dialog.dart';
 
-class PolygonInfoPanel extends StatelessWidget {
+class PolygonInfoPanel extends StatefulWidget {
   final PolygonArea polygon;
   final VoidCallback onClose;
   final void Function(String roomId)? onShowRoute;
 
-  PolygonInfoPanel({
+  const PolygonInfoPanel({
     super.key,
     required this.polygon,
     required this.onClose,
     required this.onShowRoute,
   });
+
+  @override
+  PolygonInfoPanelState createState() => PolygonInfoPanelState();
+}
+
+class PolygonInfoPanelState extends State<PolygonInfoPanel> {
+  late Future<List<dynamic>> _exhibitFuture;
+  late String _lastPolygonId;
+
+  @override
+  void initState() {
+    super.initState();
+    _lastPolygonId = widget.polygon.id;
+    _exhibitFuture = _fetchExhibits(_lastPolygonId);
+  }
+
+  @override
+  void didUpdateWidget(covariant PolygonInfoPanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.polygon.id != _lastPolygonId) {
+      _lastPolygonId = widget.polygon.id;
+      _exhibitFuture = _fetchExhibits(_lastPolygonId);
+    }
+  }
 
   final APIService apiService = APIService();
 
@@ -181,6 +205,7 @@ class PolygonInfoPanel extends StatelessWidget {
                                 MediaQuery.of(context).size.width > 600
                                     ? 1.2
                                     : 0.85, // Changed from 0.9 to 0.85
+
                           ),
                           itemCount: exhibits.length,
                           itemBuilder: (context, index) {
