@@ -164,6 +164,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void highlightRooms(String category) {
     setState(() {
       highlightedCategory = (highlightedCategory == category) ? "" : category;
+      _currentFloor = 1;
       _selectedPolygon = null;
       _showInfoPanel = false;
     });
