@@ -167,6 +167,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       _selectedPolygon = null;
       _showInfoPanel = false;
     });
+    
     Navigator.pop(context);
   }
 
@@ -212,6 +213,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     if (_selectingFromRoom) {
       setState(() {
+        if (tappedPolygon?.type == highlightedCategory) {
+          highlightedCategory = "";
+          print("category sert to empty");
+        }
         _fromRoom = Room(
           id: tappedPolygon?.id,
           name: tappedPolygon?.name ?? "Unknown Room",
@@ -225,6 +230,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     if (_selectingToRoom) {
       setState(() {
+        if (tappedPolygon?.type == highlightedCategory) {
+          highlightedCategory = "";
+          print("category sert to empty");
+        }
         _toRoom = Room(
           id: tappedPolygon?.id,
           name: tappedPolygon?.name ?? "Unknown Room",
@@ -350,6 +359,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   void _cancelSelection() {
     setState(() {
+      _selectingFromRoom = false;
+      _selectingToRoom = false;
+    });
+  }
+
+  void _simulateMapTap(PolygonArea polygon) {
+    if (polygon.points.isEmpty) return;
+    final center = _calculatePolygonCenter(polygon.points);
+    _handleMapTap(const TapPosition(Offset(0, 0), Offset(0, 0)), center);
+    setState(() {
+      _selectedPolygon = polygon;
+      _showInfoPanel = true;
       _selectingFromRoom = false;
       _selectingToRoom = false;
     });

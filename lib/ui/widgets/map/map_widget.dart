@@ -111,13 +111,13 @@ class _MapWidgetState extends State<MapWidget> {
                   .map((polygon) {
                 return Polygon(
                   points: polygon.points,
-                  color: widget.isSelectingOnMap
+                  color: widget.isSelectingOnMap || polygon.type == widget.highlightedCategory
                       ? Colors.blue.withValues(alpha: 0.15)
-                      : polygon.type == widget.highlightedCategory ? Colors.orange.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.15),
-                  borderColor: widget.isSelectingOnMap
+                      : Colors.white.withValues(alpha: 0.15),
+                  borderColor: widget.isSelectingOnMap || polygon.type == widget.highlightedCategory
                       ? Colors.blueAccent.withValues(alpha: 0.8)
-                      : polygon.type == widget.highlightedCategory ? Colors.orange.withValues(alpha: 0.60) : Colors.white.withValues(alpha: 0.6),
-                  borderStrokeWidth: widget.isSelectingOnMap ? 2.0 : 1.0,
+                      : Colors.white.withValues(alpha: 0.6),
+                  borderStrokeWidth: widget.isSelectingOnMap || polygon.type == widget.highlightedCategory? 2.0 : 1.0,
                 );
               }).toList(),
             ),
