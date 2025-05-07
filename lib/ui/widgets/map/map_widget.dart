@@ -62,7 +62,6 @@ class _MapWidgetState extends State<MapWidget> {
     final typeCounts = <String, int>{};
     for (final polygon in floorPolygons) {
       typeCounts[polygon.type] = (typeCounts[polygon.type] ?? 0) + 1;
-      print('Polygon Type: ${polygon.type}, Count: ${typeCounts[polygon.type]}');
     }
     if (typeCounts[widget.highlightedCategory] == 1) {
       WidgetsBinding.instance.addPostFrameCallback((_) {

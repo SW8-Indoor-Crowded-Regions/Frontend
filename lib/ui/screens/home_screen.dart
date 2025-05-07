@@ -215,7 +215,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       setState(() {
         if (tappedPolygon?.type == highlightedCategory) {
           highlightedCategory = "";
-          print("category sert to empty");
         }
         _fromRoom = Room(
           id: tappedPolygon?.id,
@@ -232,7 +231,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       setState(() {
         if (tappedPolygon?.type == highlightedCategory) {
           highlightedCategory = "";
-          print("category sert to empty");
         }
         _toRoom = Room(
           id: tappedPolygon?.id,
@@ -373,8 +371,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       _showInfoPanel = true;
       _selectingFromRoom = false;
       _selectingToRoom = false;
+      highlightedCategory = '';
     });
-    print("simulating maptap...");
   }
 
   @override
