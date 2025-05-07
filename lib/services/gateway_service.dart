@@ -1,11 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:indoor_crowded_regions_frontend/ui/components/error_toast.dart';
+import 'package:indoor_crowded_regions_frontend/ui/widgets/utils/types.dart';
 
 class GatewayService {
   final dio = Dio();
 
-  Future<List<Map<String, dynamic>>> getFastestRouteWithCoordinates(
+  Future<List<DoorObject>> getFastestRouteWithCoordinates(
       String source, String target) async {
     try {
       final String baseUrl = dotenv.env['BASE_URL'] ?? "http://localhost:8000";
@@ -17,8 +18,11 @@ class GatewayService {
         },
       );
 
-      List<Map<String, dynamic>> sensorsWithCoordinates =
-          (response.data['fastest_path'] as List).cast<Map<String, dynamic>>();
+
+      List<DoorObject> sensorsWithCoordinates =
+          (response.data['fastest_path'] as List)
+              .map((e) => DoorObject.fromJson(e))
+              .toList();
 
       return sensorsWithCoordinates;
     } catch (e) {

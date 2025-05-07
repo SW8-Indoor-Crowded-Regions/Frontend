@@ -15,6 +15,7 @@ import '../../services/api_service.dart';
 import '../../services/gateway_service.dart';
 import '../../services/polygon_service.dart';
 import '../../models/polygon_area.dart';
+import '../widgets/utils/types.dart';
 
 class Room {
   final String? id;
@@ -28,7 +29,7 @@ class Room {
 
 class HomeScreen extends StatefulWidget {
   @visibleForTesting
-  final Future<List<Map<String, dynamic>>> Function(dynamic)? loadGraphDataFn;
+  final Future<List<DoorObject>> Function(dynamic)? loadGraphDataFn;
   @visibleForTesting
   final bool skipUserLocation;
   @visibleForTesting
@@ -69,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _showTopBar = false;
   bool _selectingFromRoom = false;
   bool _selectingToRoom = false;
-  late Future<List<Map<String, dynamic>>> _edgesFuture;
+  late Future<List<DoorObject>> _edgesFuture;
 
   String highlightedCategory = "";
 
@@ -369,7 +370,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       drawer: BurgerDrawer(highlightedCategory: highlightRooms),
       body: Stack(
         children: [
-          FutureBuilder<List<Map<String, dynamic>>>(
+          FutureBuilder<List<DoorObject>>(
             future: _edgesFuture,
             builder: (context, snapshot) {
               return MapWidget(

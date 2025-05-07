@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart' as dotenv;
+import 'package:indoor_crowded_regions_frontend/ui/widgets/utils/types.dart';
 
 class MockGatewayService extends Mock implements GatewayService {
   @override
@@ -13,8 +14,8 @@ class MockGatewayService extends Mock implements GatewayService {
           {Object? returnValue, Object? returnValueForMissingStub}) =>
       super.noSuchMethod(
         invocation,
-        returnValue: Future.value(<Map<String, dynamic>>[]),
-        returnValueForMissingStub: Future.value(<Map<String, dynamic>>[]),
+        returnValue: Future.value(<DoorObject>[]),
+        returnValueForMissingStub: Future.value(<DoorObject>[]),
       );
 }
 
@@ -28,8 +29,16 @@ void main() {
 
     when(mockGatewayService.getFastestRouteWithCoordinates("test", "test"))
         .thenAnswer((_) async => [
-              {"id": "sensor1", "longitude": 12.577325, "latitude": 55.688495},
-              {"id": "sensor2", "longitude": 12.577545, "latitude": 55.688732},
+              DoorObject(
+                id: "sensor1",
+                longitude: 12.577325,
+                latitude: 55.688495,
+              ),
+              DoorObject(
+                id: "sensor2",
+                longitude: 12.577545,
+                latitude: 55.688732,
+              ),
             ]);
 
     await tester.pumpWidget(
@@ -52,8 +61,16 @@ void main() {
 
     when(mockGatewayService.getFastestRouteWithCoordinates("test", "test"))
         .thenAnswer((_) async => [
-              {"id": "sensor1", "longitude": 12.577325, "latitude": 55.688495},
-              {"id": "sensor2", "longitude": 12.577545, "latitude": 55.688732},
+              DoorObject(
+                id: "sensor1",
+                longitude: 12.577325,
+                latitude: 55.688495,
+              ),
+              DoorObject(
+                id: "sensor2",
+                longitude: 12.577545,
+                latitude: 55.688732,
+              ),
             ]);
 
     await tester.pumpWidget(
@@ -77,9 +94,21 @@ void main() {
 
     when(mockGatewayService.getFastestRouteWithCoordinates("test", "test"))
         .thenAnswer((_) async => [
-              {"id": "sensor1", "longitude": 12.577325, "latitude": 55.688495},
-              {"id": "sensor2", "longitude": 12.577545, "latitude": 55.688732},
-              {"id": "sensor3", "longitude": 12.577640, "latitude": 55.688732},
+              DoorObject(
+                id: "sensor1",
+                longitude: 12.577325,
+                latitude: 55.688495,
+              ),
+              DoorObject(
+                id: "sensor2",
+                longitude: 12.577545,
+                latitude: 55.688732,
+              ),
+              DoorObject(
+                id: "sensor3",
+                longitude: 12.577640,
+                latitude: 55.688732,
+              ),
             ]);
 
     await tester.pumpWidget(
@@ -108,7 +137,7 @@ void main() {
 }
 
 class HomeScreenTestWrapper extends StatelessWidget {
-  final Future<List<Map<String, dynamic>>> Function(dynamic)?
+  final Future<List<DoorObject>> Function(dynamic)?
       loadGraphDataOverride;
   final bool skipUserLocation;
 
