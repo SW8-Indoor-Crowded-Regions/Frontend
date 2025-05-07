@@ -17,7 +17,8 @@ import 'exhibit_detail_dialog.dart';
 ///
 /// If there are no artworks to display, it shows a message indicating that no results were found.
 ///
-/// Each artwork is displayed in a styled card similar to the PolygonInfoPanel exhibit cards.
+/// Each artwork is displayed in an [ExhibitCard].
+
 class ArtworkResultsList extends StatelessWidget {
   /// The list of artworks to display
   final List<dynamic> artworks;

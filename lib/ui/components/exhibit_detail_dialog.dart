@@ -44,7 +44,7 @@ class ExhibitDetailDialog extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
           color: Colors.orange.shade500, // Orange border
-          width: 2, // Border thickness
+          width: 1, // Border thickness
         ),
       ),
       child: ConstrainedBox(
