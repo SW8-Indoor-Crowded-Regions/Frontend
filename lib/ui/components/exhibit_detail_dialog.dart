@@ -15,15 +15,11 @@ class ExhibitDetailDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String title =
-        DataExtractor.extractTitle(exhibit) ?? 'No Title Available';
-    final String artist =
-        _formatArtist(DataExtractor.extractArtist(exhibit) ?? 'Unknown');
+    final String title = DataExtractor.extractTitle(exhibit);
+    final String artist = _formatArtist(DataExtractor.extractArtist(exhibit));
     final String? thumbnail = exhibit["image_thumbnail"];
-    final String location =
-        DataExtractor.extractLocation(exhibit) ?? 'Location Not Provided';
-    final String dating =
-        DateFormatter.formatDating(exhibit) ?? 'Dating Not Available';
+    final String location = DataExtractor.extractLocation(exhibit);
+    final String dating = DateFormatter.formatDating(exhibit);
     final List<String> materials =
         DataExtractor.extractListValues(exhibit, "materials");
     final List<String> techniques =
@@ -34,8 +30,7 @@ class ExhibitDetailDialog extends StatelessWidget {
         DimensionFormatter.formatNettoDimensions(exhibit) ??
             'Dimensions Not Available';
     final String description =
-        DataExtractor.extractValue(exhibit, "content_description") ??
-            'Description Not Available';
+        DataExtractor.extractValue(exhibit, "content_description");
     final String? frontendUrl = exhibit["frontend_url"];
 
     return Dialog(
@@ -57,7 +52,7 @@ class ExhibitDetailDialog extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (thumbnail != null && thumbnail.isNotEmpty)
+              if (thumbnail != null)
                 _buildHeaderWithImage(context, thumbnail, title, artist),
               Flexible(
                 child: SingleChildScrollView(
@@ -65,7 +60,7 @@ class ExhibitDetailDialog extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (thumbnail == null || thumbnail.isEmpty)
+                      if (thumbnail == null)
                         _buildHeaderWithoutImage(title, artist),
                       ExhibitDetailRow(label: "Location", value: location),
                       if (dating != "Unknown")
@@ -83,8 +78,7 @@ class ExhibitDetailDialog extends StatelessWidget {
                         ColorSection(label: "Colors", colors: colors),
                       if (description.isNotEmpty && description != "Unknown")
                         _buildDescriptionSection(description),
-                      if (frontendUrl != null && frontendUrl.isNotEmpty)
-                        _buildLinkButton(frontendUrl),
+                      if (frontendUrl != null) _buildLinkButton(frontendUrl),
                     ],
                   ),
                 ),
@@ -128,7 +122,7 @@ class ExhibitDetailDialog extends StatelessWidget {
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.transparent,
-                      Colors.black.withOpacity(0.7),
+                      Colors.black.withValues(alpha: 0.7),
                     ],
                   ),
                 ),
