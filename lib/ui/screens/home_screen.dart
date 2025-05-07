@@ -364,7 +364,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     });
   }
 
-  void _simulateMapTap(PolygonArea polygon) {
+  void simulateMapTap(PolygonArea polygon) {
     if (polygon.points.isEmpty) return;
     final center = _calculatePolygonCenter(polygon.points);
     _handleMapTap(const TapPosition(Offset(0, 0), Offset(0, 0)), center);
@@ -374,6 +374,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       _selectingFromRoom = false;
       _selectingToRoom = false;
     });
+    print("simulating maptap...");
   }
 
   @override
@@ -409,6 +410,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 fromRoom: _fromRoom,
                 toRoom: _toRoom,
                 highlightedCategory: highlightedCategory,
+                simulateMapTap: simulateMapTap,
               );
             },
           ),
