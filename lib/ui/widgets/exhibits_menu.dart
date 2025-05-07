@@ -103,15 +103,16 @@ class _ExhibitsMenuState extends State<ExhibitsMenu> {
           onPressed: () => showExhibits(false),
         ),
         title: const Text("Search Exhibits"),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.orange.shade800,
+        backgroundColor: const Color(0xFF1E1E1E), // Dark background for app bar
+        foregroundColor:
+            const Color(0xFFFF7D00), // Brighter orange for dark mode
         elevation: 2,
       ),
       body: Stack(
         children: <Widget>[
           // Content of the screen, including artworks list
           Container(
-            color: Colors.grey.shade50,
+            color: const Color(0xFF121212), // Dark background for body
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
@@ -141,7 +142,8 @@ class _ExhibitsMenuState extends State<ExhibitsMenu> {
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: Colors.orange.shade800,
+                            color: const Color(
+                                0xFFFF7D00), // Brighter orange for dark mode
                           ),
                         ),
                       ),
