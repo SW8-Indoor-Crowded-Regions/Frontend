@@ -13,17 +13,16 @@ class TopBar extends StatefulWidget {
   final VoidCallback? onGetDirections;
   final Function? setEdgesFuture;
 
-  const TopBar({
-    super.key,
-    this.fromRoom,
-    this.toRoom,
-    this.gatewayService,
-    this.onClose,
-    this.onFromPressed,
-    this.onToPressed,
-    this.onGetDirections,
-    this.setEdgesFuture
-  });
+  const TopBar(
+      {super.key,
+      this.fromRoom,
+      this.toRoom,
+      this.gatewayService,
+      this.onClose,
+      this.onFromPressed,
+      this.onToPressed,
+      this.onGetDirections,
+      this.setEdgesFuture});
 
   @override
   State<TopBar> createState() => _TopBarState();
@@ -37,8 +36,10 @@ class _TopBarState extends State<TopBar> {
   @override
   void initState() {
     super.initState();
-    _fromController = TextEditingController(text: widget.fromRoom?.name ?? "Select starting point");
-    _toController = TextEditingController(text: widget.toRoom?.name ?? "Select destination");
+    _fromController = TextEditingController(
+        text: widget.fromRoom?.name ?? "Select starting point");
+    _toController = TextEditingController(
+        text: widget.toRoom?.name ?? "Select destination");
     _gatewayService = widget.gatewayService ?? GatewayService();
   }
 
@@ -60,7 +61,6 @@ class _TopBarState extends State<TopBar> {
     super.dispose();
   }
 
-
   void _fetchRoute() {
     if (widget.fromRoom?.id != null && widget.toRoom?.id != null) {
       final res = _gatewayService!.getFastestRouteWithCoordinates(
@@ -70,10 +70,11 @@ class _TopBarState extends State<TopBar> {
 
       widget.setEdgesFuture!(res);
 
-       ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Calculating route from ${widget.fromRoom?.name ?? 'Start'} to ${widget.toRoom?.name ?? 'End'}...'),
-          backgroundColor: Colors.blueAccent,
+          content: Text(
+              'Calculating route from ${widget.fromRoom?.name ?? 'Start'} to ${widget.toRoom?.name ?? 'End'}...'),
+          backgroundColor: Colors.blue.shade700, // Darker blue for dark mode
           duration: const Duration(seconds: 2),
         ),
       );
@@ -81,29 +82,31 @@ class _TopBarState extends State<TopBar> {
       res.then((routeData) {
         if (routeData.isNotEmpty && mounted) {
         } else if (routeData.isEmpty && mounted) {
-             ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                content: Text('Could not find a route between the selected points.'),
-                backgroundColor: Colors.orangeAccent,
-                ),
-            );
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text(
+                  'Could not find a route between the selected points.'),
+              backgroundColor:
+                  Colors.orange.shade700, // Darker orange for dark mode
+            ),
+          );
         }
       }).catchError((error) {
-          if (mounted) {
-               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                content: Text('Error calculating route: $error'),
-                backgroundColor: Colors.redAccent,
-                ),
-            );
-          }
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error calculating route: $error'),
+              backgroundColor: Colors.red.shade700, // Darker red for dark mode
+            ),
+          );
+        }
       });
-
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select both a starting point and a destination on the map.'),
-          backgroundColor: Colors.redAccent,
+        SnackBar(
+          content: const Text(
+              'Please select both a starting point and a destination on the map.'),
+          backgroundColor: Colors.red.shade700, // Darker red for dark mode
         ),
       );
     }
@@ -114,18 +117,20 @@ class _TopBarState extends State<TopBar> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-         color: Colors.white.withValues(alpha: 0.95),
-         borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(16),
-              bottomRight: Radius.circular(16),
-         ),
-         boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-         ],
+        color: const Color(0xFF1E1E1E)
+            .withValues(alpha: 0.95), // Dark background for top bar
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(16),
+          bottomRight: Radius.circular(16),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black
+                .withValues(alpha: 0.3), // Darker shadow for visibility
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -133,17 +138,18 @@ class _TopBarState extends State<TopBar> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-               const Text(
-                  "Route Planner",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-               ),
+              const Text(
+                "Route Planner",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white, // Light text for dark mode
+                ),
+              ),
               if (widget.onClose != null)
                 IconButton(
-                  icon: const Icon(Icons.close, color: Colors.black54),
+                  icon: const Icon(Icons.close,
+                      color: Colors.white70), // Light icon for dark mode
                   onPressed: widget.onClose,
                   tooltip: "Close Route Planner",
                 ),
@@ -189,7 +195,8 @@ class _TopBarState extends State<TopBar> {
           label: const Text("Get Directions"),
           style: ElevatedButton.styleFrom(
             foregroundColor: Colors.white,
-            backgroundColor: Colors.orange.shade700,
+            backgroundColor:
+                const Color(0xFFFF7D00), // Brighter orange for dark mode
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -200,6 +207,4 @@ class _TopBarState extends State<TopBar> {
       ],
     );
   }
-
-  
 }

@@ -9,8 +9,9 @@ class BurgerMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.3), 
-        borderRadius: BorderRadius.circular(12), 
+        color: const Color(0xFF1E1E1E)
+            .withValues(alpha: 0.8), // Dark background for burger menu
+        borderRadius: BorderRadius.circular(12),
       ),
       child: IconButton(
         icon: const Icon(Icons.menu, size: 40, color: Colors.white),
