@@ -11,6 +11,7 @@ void main() {
       occupants: 5,
       area: 25.0,
       popularityFactor: 0.6,
+      floor: 1,
     );
 
     final roomB = RoomObject(
@@ -20,6 +21,7 @@ void main() {
       occupants: 15,
       area: 30.0,
       popularityFactor: 0.9,
+      floor: 1,
     );
 
     final initPath = [
