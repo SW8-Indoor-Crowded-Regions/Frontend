@@ -1,4 +1,4 @@
-class Room {
+class RoomObject {
   final String id;
   final String name;
   final double crowdFactor;
@@ -6,7 +6,7 @@ class Room {
   final double area;
   final double popularityFactor;
 
-  Room({
+  RoomObject({
     required this.id,
     required this.name,
     required this.crowdFactor,
@@ -15,8 +15,8 @@ class Room {
     required this.popularityFactor,
   });
 
-  factory Room.fromJson(Map<String, dynamic> json) {
-    return Room(
+  factory RoomObject.fromJson(Map<String, dynamic> json) {
+    return RoomObject(
       id: json['id'],
       name: json['name'],
       crowdFactor: (json['crowd_factor'] as num).toDouble(),
@@ -31,7 +31,7 @@ class DoorObject {
   final String id;
   final double longitude;
   final double latitude;
-  final List<Room> rooms;
+  final List<RoomObject> rooms;
   final bool isVertical;
 
   DoorObject({
@@ -48,7 +48,7 @@ class DoorObject {
       longitude: (json['longitude'] as num).toDouble(),
       latitude: (json['latitude'] as num).toDouble(),
       rooms: (json['rooms'] as List<dynamic>)
-          .map((roomJson) => Room.fromJson(roomJson))
+          .map((roomJson) => RoomObject.fromJson(roomJson))
           .toList(),
       isVertical: json['is_vertical'],
     );

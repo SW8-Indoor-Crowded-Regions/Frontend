@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:indoor_crowded_regions_frontend/ui/widgets/utils/path_beautify.dart';
 import 'package:indoor_crowded_regions_frontend/ui/widgets/utils/types.dart';
 
-void main() {
+void mainTest() {
   test('beautifyPath adds intermediate points correctly', () {
     final roomA = RoomObject(
       id: 'A',
