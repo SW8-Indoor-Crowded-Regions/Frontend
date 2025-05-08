@@ -22,14 +22,12 @@ class PolygonInfoPanel extends StatefulWidget {
 }
 
 class PolygonInfoPanelState extends State<PolygonInfoPanel> {
-  late Future<List<dynamic>> _exhibitFuture;
   late String _lastPolygonId;
 
   @override
   void initState() {
     super.initState();
     _lastPolygonId = widget.polygon.id;
-    _exhibitFuture = _fetchExhibits(_lastPolygonId);
   }
 
   @override
@@ -37,7 +35,6 @@ class PolygonInfoPanelState extends State<PolygonInfoPanel> {
     super.didUpdateWidget(oldWidget);
     if (widget.polygon.id != _lastPolygonId) {
       _lastPolygonId = widget.polygon.id;
-      _exhibitFuture = _fetchExhibits(_lastPolygonId);
     }
   }
 
@@ -204,7 +201,7 @@ class PolygonInfoPanelState extends State<PolygonInfoPanel> {
                             childAspectRatio:
                                 MediaQuery.of(context).size.width > 600
                                     ? 1.2
-                                    : 0.85, // Changed from 0.9 to 0.85
+                                    : 0.75, // Changed from 0.9 to 0.85
 
                           ),
                           itemCount: exhibits.length,

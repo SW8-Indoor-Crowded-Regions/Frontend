@@ -4,7 +4,7 @@ import 'package:indoor_crowded_regions_frontend/ui/components/error_toast.dart';
 
 class APIService {
   final dio = Dio(BaseOptions(
-    baseUrl: dotenv.env['baseUrl'] ?? "http://localhost:8000",
+    baseUrl: dotenv.env['BASE_URL'] ?? "http://localhost:8000",
   ));
 
   Future<Response> searchArtwork(String query) async {

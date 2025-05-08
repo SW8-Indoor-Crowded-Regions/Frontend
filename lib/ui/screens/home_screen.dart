@@ -39,7 +39,7 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({
     super.key,
     this.loadGraphDataFn,
-    this.skipUserLocation = false,
+    this.skipUserLocation = true,
     this.isTestMode = false,
     this.gatewayService,
   });
