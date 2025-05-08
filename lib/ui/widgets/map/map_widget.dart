@@ -21,6 +21,8 @@ class MapWidget extends StatefulWidget {
   final Function(MapCamera, bool) onPositionChanged;
   final Room? fromRoom;
   final Room? toRoom;
+  final String highlightedCategory;
+  final Function(PolygonArea) simulateMapTap;
 
   const MapWidget({
     super.key,
@@ -37,6 +39,8 @@ class MapWidget extends StatefulWidget {
     required this.onPositionChanged,
     this.fromRoom,
     this.toRoom,
+    required this.highlightedCategory,
+    required this.simulateMapTap
   });
 
   @override
@@ -55,7 +59,18 @@ class _MapWidgetState extends State<MapWidget> {
         .where((polygon) =>
             polygon.additionalData?['floor'] == widget.currentFloor)
         .toList();
-
+    final typeCounts = <String, int>{};
+    for (final polygon in floorPolygons) {
+      typeCounts[polygon.type] = (typeCounts[polygon.type] ?? 0) + 1;
+    }
+    if (typeCounts[widget.highlightedCategory] == 1) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final polygon = floorPolygons.firstWhere(
+          (polygon) => polygon.type == widget.highlightedCategory,
+        );
+        widget.simulateMapTap(polygon);
+      });
+    }
     // Find the polygon objects for fromRoom and toRoom
     PolygonArea? fromRoomPolygon;
     PolygonArea? toRoomPolygon;
@@ -100,7 +115,6 @@ class _MapWidgetState extends State<MapWidget> {
         ),
         Stack(
           children: [
-            // Regular polygons
             PolygonLayer(
               polygons: floorPolygons
                   .where((polygon) =>
@@ -108,18 +122,17 @@ class _MapWidgetState extends State<MapWidget> {
                       polygon.id != widget.selectedPolygon!.id)
                   .map((polygon) {
                 return Polygon(
-                  points: polygon.points,
-                  color: widget.isSelectingOnMap
+                  points: polygon.points, 
+                  color: widget.isSelectingOnMap || (polygon.type == widget.highlightedCategory && typeCounts[polygon.type]! > 1)
                       ? Colors.blue.withValues(alpha: 0.15)
                       : Colors.white.withValues(alpha: 0.15),
-                  borderColor: widget.isSelectingOnMap
+                  borderColor: widget.isSelectingOnMap || (polygon.type == widget.highlightedCategory && typeCounts[polygon.type]! > 1)
                       ? Colors.blueAccent.withValues(alpha: 0.8)
                       : Colors.white.withValues(alpha: 0.6),
-                  borderStrokeWidth: widget.isSelectingOnMap ? 2.0 : 1.0,
+                  borderStrokeWidth: widget.isSelectingOnMap || (polygon.type == widget.highlightedCategory && typeCounts[polygon.type]! > 1) ? 2.0 : 1.0,
                 );
               }).toList(),
             ),
-
             // Selected polygon with pulse animation
             if (widget.selectedPolygon != null && !widget.isSelectingOnMap)
               AnimatedBuilder(
