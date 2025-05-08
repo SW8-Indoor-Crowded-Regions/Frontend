@@ -15,6 +15,7 @@ import '../../services/api_service.dart';
 import '../../services/gateway_service.dart';
 import '../../services/polygon_service.dart';
 import '../../models/polygon_area.dart';
+import '../widgets/utils/types.dart';
 
 class Room {
   final String? id;
@@ -28,7 +29,7 @@ class Room {
 
 class HomeScreen extends StatefulWidget {
   @visibleForTesting
-  final Future<List<Map<String, dynamic>>> Function(dynamic)? loadGraphDataFn;
+  final Future<List<DoorObject>> Function(dynamic)? loadGraphDataFn;
   @visibleForTesting
   final bool skipUserLocation;
   @visibleForTesting
@@ -69,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _showTopBar = false;
   bool _selectingFromRoom = false;
   bool _selectingToRoom = false;
-  late Future<List<Map<String, dynamic>>> _edgesFuture;
+  late Future<List<DoorObject>> _edgesFuture;
 
   String highlightedCategory = "";
 
@@ -164,9 +165,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void highlightRooms(String category) {
     setState(() {
       highlightedCategory = (highlightedCategory == category) ? "" : category;
+      _currentFloor = 1;
       _selectedPolygon = null;
       _showInfoPanel = false;
     });
+    
     Navigator.pop(context);
   }
 
@@ -212,6 +215,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     if (_selectingFromRoom) {
       setState(() {
+        if (tappedPolygon?.type == highlightedCategory) {
+          highlightedCategory = "";
+        }
         _fromRoom = Room(
           id: tappedPolygon?.id,
           name: tappedPolygon?.name ?? "Unknown Room",
@@ -225,6 +231,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     if (_selectingToRoom) {
       setState(() {
+        if (tappedPolygon?.type == highlightedCategory) {
+          highlightedCategory = "";
+        }
         _toRoom = Room(
           id: tappedPolygon?.id,
           name: tappedPolygon?.name ?? "Unknown Room",
@@ -355,6 +364,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     });
   }
 
+  void simulateMapTap(PolygonArea polygon) {
+    if (polygon.points.isEmpty) return;
+    final center = _calculatePolygonCenter(polygon.points);
+    _handleMapTap(const TapPosition(Offset(0, 0), Offset(0, 0)), center);
+    setState(() {
+      _selectedPolygon = polygon;
+      _showInfoPanel = true;
+      _selectingFromRoom = false;
+      _selectingToRoom = false;
+      highlightedCategory = '';
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.isTestMode && _pulseAnimationController.isAnimating) {
@@ -369,7 +391,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       drawer: BurgerDrawer(highlightedCategory: highlightRooms),
       body: Stack(
         children: [
-          FutureBuilder<List<Map<String, dynamic>>>(
+          FutureBuilder<List<DoorObject>>(
             future: _edgesFuture,
             builder: (context, snapshot) {
               return MapWidget(
@@ -388,6 +410,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 onPositionChanged: _handlePositionChanged,
                 fromRoom: _fromRoom,
                 toRoom: _toRoom,
+                highlightedCategory: highlightedCategory,
+                simulateMapTap: simulateMapTap,
               );
             },
           ),
