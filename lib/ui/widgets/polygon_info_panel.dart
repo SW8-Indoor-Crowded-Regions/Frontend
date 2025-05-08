@@ -92,7 +92,7 @@ class PolygonInfoPanelState extends State<PolygonInfoPanel> {
                   child: Row(
                     children: [
                       Text(
-                        polygon.name,
+                        widget.polygon.name,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Color(0xFFFF7D00), // Brighter orange
@@ -102,7 +102,7 @@ class PolygonInfoPanelState extends State<PolygonInfoPanel> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        '${polygon.type} • Floor ${polygon.additionalData?['floor']?.toString() ?? 'N/A'}',
+                        '${widget.polygon.type} • Floor ${widget.polygon.additionalData?['floor']?.toString() ?? 'N/A'}',
                         style: TextStyle(
                           color: Colors
                               .grey.shade400, // Lighter gray for visibility
@@ -116,7 +116,7 @@ class PolygonInfoPanelState extends State<PolygonInfoPanel> {
                 IconButton(
                   icon: const Icon(Icons.close,
                       color: Color(0xFFFF7D00)), // Brighter orange
-                  onPressed: onClose,
+                  onPressed: widget.onClose,
                   tooltip: 'Close Panel',
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
@@ -130,7 +130,7 @@ class PolygonInfoPanelState extends State<PolygonInfoPanel> {
             padding: const EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 0.0),
             child: ElevatedButton.icon(
               onPressed: () {
-                onShowRoute!(polygon.id);
+                widget.onShowRoute!(widget.polygon.id);
               },
               icon: const Icon(Icons.alt_route),
               label: const Text("Show Route"),
@@ -166,7 +166,7 @@ class PolygonInfoPanelState extends State<PolygonInfoPanel> {
                   // Use SizedBox with zero height to eliminate any default spacing
                   const SizedBox(height: 0),
                   FutureBuilder<List<dynamic>>(
-                    future: _fetchExhibits(polygon.id),
+                    future: _fetchExhibits(widget.polygon.id),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Text(
