@@ -296,7 +296,13 @@ class _MapWidgetState extends State<MapWidget> {
             }).toList(),
           ),
         if (widget.pathData != null && widget.pathData!.isNotEmpty)
-          LinePath(pathCoordinates: widget.pathData!),
+          if (widget.pathData != null)
+            LinePath(
+              pathCoordinates: widget.pathData!
+                  .where((sensor) => sensor.rooms
+                      .any((room) => room.floor == widget.currentFloor))
+                  .toList(),
+            ),
         if (widget.userLocationWidget != null) widget.userLocationWidget!,
       ],
     );
