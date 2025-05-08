@@ -5,6 +5,7 @@ class RoomObject {
   final int occupants;
   final double area;
   final double popularityFactor;
+  final int floor;
 
   RoomObject({
     required this.id,
@@ -13,6 +14,7 @@ class RoomObject {
     required this.occupants,
     required this.area,
     required this.popularityFactor,
+    required this.floor,
   });
 
   factory RoomObject.fromJson(Map<String, dynamic> json) {
@@ -23,6 +25,7 @@ class RoomObject {
       occupants: json['occupants'],
       area: (json['area'] as num).toDouble(),
       popularityFactor: (json['popularity_factor'] as num).toDouble(),
+      floor: json['floor'],
     );
   }
 }

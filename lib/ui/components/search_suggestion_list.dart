@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
 /// A widget that displays a list of search suggestions.
-/// 
+///
 /// __[suggestions]__ is the list of suggestions to display.
-/// 
+///
 /// __[onSelect]__ is a callback function that is called when a suggestion is selected.
-/// 
-/// The widget uses a [ListView] to display the suggestions.Each suggestion 
-/// is displayed in a [ListTile] widget. When a suggestion is selected, 
+///
+/// The widget uses a [ListView] to display the suggestions.Each suggestion
+/// is displayed in a [ListTile] widget. When a suggestion is selected,
 /// it calls the [onSelect] function with the selected suggestion.
 class SearchSuggestionList extends StatelessWidget {
   final List<String> suggestions;
@@ -32,11 +32,12 @@ class SearchSuggestionList extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 4.0),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: const Color(0xFF2D2D2D), // Dark background for suggestions
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withAlpha(10),
+                color:
+                    Colors.black.withAlpha(50), // Darker shadow for visibility
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -53,7 +54,9 @@ class SearchSuggestionList extends StatelessWidget {
               return ListTile(
                 dense: true,
                 visualDensity: VisualDensity.compact,
-                title: Text(truncatedItem),
+                title: Text(truncatedItem,
+                    style: const TextStyle(
+                        color: Colors.white70)), // Light text for dark mode
                 onTap: () => onSelect(item),
               );
             },

@@ -33,11 +33,33 @@ void main() {
                 id: "sensor1",
                 longitude: 12.577325,
                 latitude: 55.688495,
+                rooms: [
+                  RoomObject(
+                    id: "room1",
+                    name: "Room 1",
+                    crowdFactor: 0.5,
+                    occupants: 10,
+                    area: 20.0,
+                    popularityFactor: 0.7,
+                    floor: 1,
+                  ),
+                ],
               ),
               DoorObject(
                 id: "sensor2",
                 longitude: 12.577545,
                 latitude: 55.688732,
+                rooms: [
+                  RoomObject(
+                    id: "room2",
+                    name: "Room 2",
+                    crowdFactor: 0.6,
+                    occupants: 15,
+                    area: 25.0,
+                    popularityFactor: 0.8,
+                    floor: 1,
+                  ),
+                ],
               ),
             ]);
 
@@ -65,11 +87,33 @@ void main() {
                 id: "sensor1",
                 longitude: 12.577325,
                 latitude: 55.688495,
+                rooms: [
+                  RoomObject(
+                    id: "room1",
+                    name: "Room 1",
+                    crowdFactor: 0.5,
+                    occupants: 10,
+                    area: 20.0,
+                    popularityFactor: 0.7,
+                    floor: 1,
+                  ),
+                ],
               ),
               DoorObject(
                 id: "sensor2",
                 longitude: 12.577545,
                 latitude: 55.688732,
+                rooms: [
+                  RoomObject(
+                    id: "room2",
+                    name: "Room 2",
+                    crowdFactor: 0.6,
+                    occupants: 15,
+                    area: 25.0,
+                    popularityFactor: 0.8,
+                    floor: 1,
+                  ),
+                ],
               ),
             ]);
 
@@ -98,16 +142,49 @@ void main() {
                 id: "sensor1",
                 longitude: 12.577325,
                 latitude: 55.688495,
+                rooms: [
+                  RoomObject(
+                    id: "room1",
+                    name: "Room 1",
+                    crowdFactor: 0.5,
+                    occupants: 10,
+                    area: 20.0,
+                    popularityFactor: 0.7,
+                    floor: 1,
+                  ),
+                ],
               ),
               DoorObject(
                 id: "sensor2",
                 longitude: 12.577545,
                 latitude: 55.688732,
+                rooms: [
+                  RoomObject(
+                    id: "room2",
+                    name: "Room 2",
+                    crowdFactor: 0.6,
+                    occupants: 15,
+                    area: 25.0,
+                    popularityFactor: 0.8,
+                    floor: 1,
+                  ),
+                ],
               ),
               DoorObject(
                 id: "sensor3",
                 longitude: 12.577640,
                 latitude: 55.688732,
+                rooms: [
+                  RoomObject(
+                    id: "room3",
+                    name: "Room 3",
+                    crowdFactor: 0.5,
+                    occupants: 10,
+                    area: 20.0,
+                    popularityFactor: 0.7,
+                    floor: 1,
+                  ),
+                ],
               ),
             ]);
 

@@ -39,7 +39,7 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({
     super.key,
     this.loadGraphDataFn,
-    this.skipUserLocation = false,
+    this.skipUserLocation = true,
     this.isTestMode = false,
     this.gatewayService,
   });
@@ -148,7 +148,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error loading map data for floor $floor.'),
-            backgroundColor: Colors.redAccent,
+            backgroundColor: Colors.red.shade700, // Darker red for dark mode
           ),
         );
       }
@@ -387,6 +387,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     return Scaffold(
       key: scaffoldKey,
+      backgroundColor: const Color(0xFF121212), // Dark background for scaffold
       drawer: BurgerDrawer(highlightedCategory: highlightRooms),
       body: Stack(
         children: [

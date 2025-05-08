@@ -76,14 +76,14 @@ class _MapWidgetState extends State<MapWidget> {
     PolygonArea? toRoomPolygon;
 
     if (widget.fromRoom != null) {
-      fromRoomPolygon = floorPolygons.firstWhere(
-        (polygon) => polygon.id == widget.fromRoom!.id,
+      fromRoomPolygon = widget.polygons.firstWhere(
+        (polygon) => polygon.id == widget.fromRoom!.id
       );
     }
 
     if (widget.toRoom != null) {
-      toRoomPolygon = floorPolygons.firstWhere(
-        (polygon) => polygon.id == widget.toRoom!.id,
+      toRoomPolygon = widget.polygons.firstWhere(
+        (polygon) => polygon.id == widget.toRoom!.id
       );
     }
 
@@ -296,7 +296,13 @@ class _MapWidgetState extends State<MapWidget> {
             }).toList(),
           ),
         if (widget.pathData != null && widget.pathData!.isNotEmpty)
-          LinePath(pathCoordinates: widget.pathData!),
+          if (widget.pathData != null)
+            LinePath(
+              pathCoordinates: widget.pathData!
+                  .where((sensor) => sensor.rooms
+                      .any((room) => room.floor == widget.currentFloor))
+                  .toList(),
+            ),
         if (widget.userLocationWidget != null) widget.userLocationWidget!,
       ],
     );
