@@ -58,7 +58,7 @@ List<DoorObject> intermediateSame(DoorObject p1, DoorObject p2, int sign) {
     ),
     DoorObject(
       longitude: p2.longitude,
-      latitude: p1.longitude + sign * 0.00002,
+      latitude: p2.latitude + sign * 0.00002,
     )
   ];
 }
