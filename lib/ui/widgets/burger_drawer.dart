@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:indoor_crowded_regions_frontend/ui/components/error_toast.dart';
 import 'exhibits_menu.dart';
+import 'filter_page.dart';
 
 class BurgerDrawer extends StatefulWidget {
   final void Function(String category) highlightedCategory;
@@ -60,6 +61,16 @@ class BurgerDrawerState extends State<BurgerDrawer> {
                     leading: const Icon(Icons.web),
                     title: const Text('Website'),
                     onTap: () => ErrorToast.show('Website is currently not available.'),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.location_on_outlined),
+                    title: const Text('Filter Search'),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const FilterPage(),
+                      ),
+                    ),
                   ),
                 ],
               ),
