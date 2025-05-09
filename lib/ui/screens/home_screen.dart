@@ -169,7 +169,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       _selectedPolygon = null;
       _showInfoPanel = false;
     });
-    
+
     Navigator.pop(context);
   }
 
@@ -388,7 +388,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Scaffold(
       key: scaffoldKey,
       backgroundColor: const Color(0xFF121212), // Dark background for scaffold
-      drawer: BurgerDrawer(highlightedCategory: highlightRooms),
+      drawer: BurgerDrawer(
+        highlightedCategory: highlightRooms,
+        setPath: (path) => {
+          setState(() {
+            _edgesFuture = path;
+            _showTopBar = false;
+            _selectingFromRoom = false;
+            _selectingToRoom = false;
+            _fromRoom = null;
+            _toRoom = null;
+            _selectedPolygon = null;
+          })
+        },
+      ),
       body: Stack(
         children: [
           FutureBuilder<List<DoorObject>>(
