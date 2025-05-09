@@ -121,8 +121,10 @@ class _FilterPageState extends State<FilterPage> {
       final path = _gatewayService.getFastestMultiRoomPath(
           "67efbb1f0b23f5290bff6fe5", rooms);
       widget.setPath(path);
-      Navigator.pop(context, path);
-      Navigator.pop(context, rooms);
+      if (mounted) {
+        Navigator.pop(context, path);
+        Navigator.pop(context, rooms);
+      }
     } catch (e) {
       ErrorToast.show("Failed to fetch rooms from filters");
     }
@@ -267,10 +269,9 @@ class _FilterPageState extends State<FilterPage> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                         side: const BorderSide(
-                          color: Color.fromARGB(255, 255, 111, 1),
-                          width: 2,
-                          style: BorderStyle.solid
-                        ),
+                            color: Color.fromARGB(255, 255, 111, 1),
+                            width: 2,
+                            style: BorderStyle.solid),
                       ),
                     ),
                     child: const Text("Confirm",
