@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:indoor_crowded_regions_frontend/ui/components/error_toast.dart';
 import 'package:indoor_crowded_regions_frontend/ui/widgets/utils/types.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'exhibits_menu.dart';
 import 'filter_page.dart';
 
@@ -54,7 +55,7 @@ class BurgerDrawerState extends State<BurgerDrawer> {
                               style: TextStyle(
                                   color: Colors
                                       .white)), // Light text for dark mode
-                          onTap: () => highlightedCategory("Bathroom"),
+                          onTap: () => highlightedCategory("BATHROOM"),
                         ),
                         ListTile(
                           leading: const Icon(Icons.shopping_cart_outlined,
@@ -64,8 +65,7 @@ class BurgerDrawerState extends State<BurgerDrawer> {
                               style: TextStyle(
                                   color: Colors
                                       .white)), // Light text for dark mode
-                          onTap: () => ErrorToast.show(
-                              'Shop is currently not available.'),
+                          onTap: () => highlightedCategory("SHOP"),
                         ),
                         ListTile(
                           leading: const Icon(Icons.food_bank_outlined,
@@ -75,7 +75,7 @@ class BurgerDrawerState extends State<BurgerDrawer> {
                               style: TextStyle(
                                   color: Colors
                                       .white)), // Light text for dark mode
-                          onTap: () => highlightedCategory("Cafeteria"),
+                          onTap: () => highlightedCategory("FOOD"),
                         ),
                         ListTile(
                           leading: const Icon(Icons.location_on_outlined,
@@ -97,8 +97,13 @@ class BurgerDrawerState extends State<BurgerDrawer> {
                               style: TextStyle(
                                   color: Colors
                                       .white)), // Light text for dark mode
-                          onTap: () => ErrorToast.show(
-                              'Website is currently not available.'),
+                          onTap: () async {
+                            try {
+                              await launchUrl(Uri.parse('https://www.smk.dk/'));
+                            } catch (e) {
+                              ErrorToast.show("Failed to access website.");
+                            }
+                          },
                         ),
                         ListTile(
                           leading: const Icon(Icons.location_on_outlined,
