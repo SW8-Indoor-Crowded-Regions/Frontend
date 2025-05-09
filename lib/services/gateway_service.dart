@@ -31,7 +31,7 @@ class GatewayService {
     }
   }
   
-  Future<List<Map<String, dynamic>>> getFastestMultiRoomPath(
+  Future<List<DoorObject>> getFastestMultiRoomPath(
       String source, List<String> roomNames) async {
     try {
       final String baseUrl = dotenv.env['BASE_URL'] ?? "http://localhost:8000";
@@ -39,12 +39,14 @@ class GatewayService {
         "$baseUrl/multi-point-path",
         data: {
           "source": source,
-          "target": roomNames,
+          "targets": roomNames,
         },
       );
 
-      List<Map<String, dynamic>> path =
-          (response.data['fastest_path'] as List).cast<Map<String, dynamic>>();
+      List<DoorObject> path =
+          (response.data['fastest_path'] as List)
+              .map((e) => DoorObject.fromJson(e))
+              .toList();
 
       return path;
     } catch (e) {
