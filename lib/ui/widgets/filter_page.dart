@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:indoor_crowded_regions_frontend/ui/components/error_toast.dart';
+import 'package:indoor_crowded_regions_frontend/ui/widgets/utils/types.dart';
 import '../../services/filter_service.dart';
+import '../../services/gateway_service.dart';
 
 class FilterPage extends StatefulWidget {
-  const FilterPage({super.key});
+  final Function(Future<List<DoorObject>> path) setPath;
+  const FilterPage({super.key, required this.setPath});
 
   @override
   State<FilterPage> createState() => _FilterPageState();
@@ -10,8 +14,9 @@ class FilterPage extends StatefulWidget {
 
 class _FilterPageState extends State<FilterPage> {
   final FilterService _filterService = FilterService();
+  final GatewayService _gatewayService = GatewayService();
   Map<String, List<String>> selectedFilters = {};
-
+  Map<String, bool> showAll = {};
 
   Map<String, Map<String, bool>> _filtersByType = {};
   bool _isLoading = true;
@@ -34,8 +39,16 @@ class _FilterPageState extends State<FilterPage> {
         final List<dynamic> filters = item['filters'];
 
         parsedFilters[type] = {
-          for (var filter in filters) filter['key'].toString(): false
+          for (var filter in filters)
+            filter['key']
+                .toString()
+                .split(' ')
+                .map((word) => word[0].toUpperCase() + word.substring(1))
+                .join(' '): false
         };
+
+        // Initialize the showAll map for this type
+        showAll[type] = false;
       }
 
       setState(() {
@@ -45,6 +58,24 @@ class _FilterPageState extends State<FilterPage> {
     } catch (_) {
       setState(() => _isLoading = false);
     }
+  }
+
+  void _toggleType(String type) {
+    setState(() {
+      // Toggle all filters of this type
+      final current = _filtersByType[type]!;
+      final allSelected = current.values.every((value) => value);
+      final newValue = !allSelected;
+      _filtersByType[type] =
+          current.map((key, value) => MapEntry(key, newValue));
+      if (newValue) {
+        // If all are selected, add to selectedFilters
+        selectedFilters[type] = current.keys.toList();
+      } else {
+        // If none are selected, remove from selectedFilters
+        selectedFilters.remove(type);
+      }
+    });
   }
 
   void _toggleFilter(String type, String key) {
@@ -82,15 +113,17 @@ class _FilterPageState extends State<FilterPage> {
         "filters": filtersPayload,
       };
 
-      print("Sending payload: ${payload}");
-
       final response = await _filterService.getRoomsFromFilters(payload);
 
-      final List<dynamic> rooms = response.data;
-      print("Received rooms: $rooms");
+      final List<String> rooms = response.cast<String>();
+
+      final path = _gatewayService.getFastestMultiRoomPath(
+          "67efbb1f0b23f5290bff6fe5", rooms);
+      widget.setPath(path);
+      Navigator.pop(context, path);
       Navigator.pop(context, rooms);
     } catch (e) {
-      print("Error while fetching rooms: $e");
+      ErrorToast.show("Failed to fetch rooms from filters");
     }
   }
 
@@ -111,23 +144,114 @@ class _FilterPageState extends State<FilterPage> {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            type[0].toUpperCase() + type.substring(1),
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                          // Text(
+                          //   type[0].toUpperCase() + type.substring(1),
+                          //   style: const TextStyle(
+                          //     fontSize: 18,
+                          //     fontWeight: FontWeight.bold,
+                          //   ),
+                          // ),
+                          SwitchListTile(
+                            title: Text(
+                              type[0].toUpperCase() + type.substring(1),
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
+                            contentPadding:
+                                const EdgeInsets.only(left: 0, right: 20),
+                            subtitle: const Text("Select all"),
+                            value: filterMap.values.every((value) => value),
+                            onChanged: (_) => _toggleType(type),
                           ),
                           const SizedBox(height: 8),
-                          ...filterMap.entries.map((filterEntry) {
-                            return SwitchListTile(
-                              title: Text(filterEntry.key),
-                              value: filterEntry.value,
-                              onChanged: (_) =>
-                                  _toggleFilter(type, filterEntry.key),
-                            );
-                          }).toList(),
-                          const SizedBox(height: 16),
+                          // Only show the first 10 filters of each type and add a "Show more" button
+                          if (!showAll[type]! && filterMap.length > 10) ...[
+                            Column(
+                              children: [
+                                ...filterMap.entries
+                                    .take(10)
+                                    .map((filterEntry) {
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 20),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          filterEntry.key,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        Transform.scale(
+                                          scale: 0.75, // Shrink the switch
+                                          child: Switch(
+                                            value: filterEntry.value,
+                                            onChanged: (_) => _toggleFilter(
+                                                type, filterEntry.key),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }),
+                                TextButton(
+                                  onPressed: () {
+                                    // Show all filters when "Show more" is pressed
+                                    setState(() {
+                                      _filtersByType[type] = filterMap;
+                                      showAll[type] = true;
+                                    });
+                                  },
+                                  child: const Text("Show more"),
+                                ),
+                              ],
+                            ),
+                          ] else ...[
+                            Column(
+                              children: [
+                                ...filterMap.entries.map((filterEntry) {
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 20),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          filterEntry.key,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        Transform.scale(
+                                          scale: 0.75, // Shrink the switch
+                                          child: Switch(
+                                            value: filterEntry.value,
+                                            onChanged: (_) => _toggleFilter(
+                                                type, filterEntry.key),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }),
+                                TextButton(
+                                  onPressed: () {
+                                    // Show all filters when "Show more" is pressed
+                                    setState(() {
+                                      _filtersByType[type] = filterMap;
+                                      showAll[type] = false;
+                                    });
+                                  },
+                                  child: const Text("Show less"),
+                                ),
+                              ],
+                            ),
+                          ],
                         ],
                       );
                     }).toList(),
