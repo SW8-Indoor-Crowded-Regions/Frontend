@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:indoor_crowded_regions_frontend/ui/components/error_toast.dart';
+import 'package:indoor_crowded_regions_frontend/ui/widgets/utils/filter_item.dart';
 import 'package:indoor_crowded_regions_frontend/ui/widgets/utils/types.dart';
 import '../../services/filter_service.dart';
 import '../../services/gateway_service.dart';
@@ -130,6 +131,7 @@ class _FilterPageState extends State<FilterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF1E1E1E),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
@@ -157,47 +159,46 @@ class _FilterPageState extends State<FilterPage> {
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
+                                color: Colors.white,
                               ),
                             ),
                             contentPadding:
                                 const EdgeInsets.only(left: 0, right: 20),
-                            subtitle: const Text("Select all"),
+                            subtitle: const Text("Select all",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.orange,
+                                )),
                             value: filterMap.values.every((value) => value),
                             onChanged: (_) => _toggleType(type),
+                            activeTrackColor: Colors.orange,
+                            inactiveTrackColor: Colors.white,
+                            thumbColor:
+                                const WidgetStatePropertyAll(Colors.grey),
                           ),
                           const SizedBox(height: 8),
                           // Only show the first 10 filters of each type and add a "Show more" button
                           if (!showAll[type]! && filterMap.length > 10) ...[
                             Column(
                               children: [
-                                ...filterMap.entries
-                                    .take(10)
-                                    .map((filterEntry) {
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 20),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          filterEntry.key,
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                        Transform.scale(
-                                          scale: 0.75, // Shrink the switch
-                                          child: Switch(
-                                            value: filterEntry.value,
-                                            onChanged: (_) => _toggleFilter(
-                                                type, filterEntry.key),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                }),
+                                ...List.generate(
+                                  filterMap.entries.take(10).length * 2 - 1,
+                                  (index) {
+                                    if (index.isOdd) {
+                                      return const Divider(
+                                          color: Colors.grey, height: 1);
+                                    }
+                                    final entryIndex = index ~/ 2;
+                                    final filterEntry =
+                                        filterMap.entries.elementAt(entryIndex);
+                                    return FilterToggleRow(
+                                        label: filterEntry.key,
+                                        value: filterEntry.value,
+                                        onChanged: (filter) {
+                                          _toggleFilter(type, filterEntry.key);
+                                        });
+                                  },
+                                ),
                                 TextButton(
                                   onPressed: () {
                                     // Show all filters when "Show more" is pressed
@@ -206,48 +207,45 @@ class _FilterPageState extends State<FilterPage> {
                                       showAll[type] = true;
                                     });
                                   },
-                                  child: const Text("Show more"),
+                                  child: const Text("Show more",
+                                      style: TextStyle(
+                                          color: Colors.orange,
+                                          fontWeight: FontWeight.bold)),
                                 ),
                               ],
                             ),
                           ] else ...[
                             Column(
                               children: [
-                                ...filterMap.entries.map((filterEntry) {
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 20),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          filterEntry.key,
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                        Transform.scale(
-                                          scale: 0.75, // Shrink the switch
-                                          child: Switch(
-                                            value: filterEntry.value,
-                                            onChanged: (_) => _toggleFilter(
-                                                type, filterEntry.key),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                }),
+                                ...List.generate(
+                                  filterMap.entries.length * 2 - 1,
+                                  (index) {
+                                    if (index.isOdd) {
+                                      return const Divider(
+                                          color: Colors.grey, height: 1);
+                                    }
+                                    final entryIndex = index ~/ 2;
+                                    final filterEntry =
+                                        filterMap.entries.elementAt(entryIndex);
+                                    return FilterToggleRow(
+                                        label: filterEntry.key,
+                                        value: filterEntry.value,
+                                        onChanged: (filter) {
+                                          _toggleFilter(type, filterEntry.key);
+                                        });
+                                  },
+                                ),
                                 TextButton(
                                   onPressed: () {
-                                    // Show all filters when "Show more" is pressed
                                     setState(() {
                                       _filtersByType[type] = filterMap;
                                       showAll[type] = false;
                                     });
                                   },
-                                  child: const Text("Show less"),
+                                  child: const Text("Show less",
+                                      style: TextStyle(
+                                          color: Colors.orange,
+                                          fontWeight: FontWeight.bold)),
                                 ),
                               ],
                             ),
@@ -264,8 +262,19 @@ class _FilterPageState extends State<FilterPage> {
                     onPressed: _confirmFilters,
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size.fromHeight(50),
+                      backgroundColor: const Color(0xFFFF7D00),
+                      shadowColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        side: const BorderSide(
+                          color: Color.fromARGB(255, 255, 111, 1),
+                          width: 2,
+                          style: BorderStyle.solid
+                        ),
+                      ),
                     ),
-                    child: const Text("Confirm"),
+                    child: const Text("Confirm",
+                        style: TextStyle(color: Colors.white)),
                   ),
                 ),
               ],
