@@ -1,14 +1,10 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:indoor_crowded_regions_frontend/utils/env.dart';
 import 'package:indoor_crowded_regions_frontend/ui/components/error_toast.dart';
 import '../models/polygon_area.dart';
 
 class PolygonService {
   final dio = Dio();
-  final String baseUrl;
-
-  PolygonService()
-      : baseUrl = dotenv.env['BASE_URL'] ?? "http://localhost:8000";
 
   Future<List<PolygonArea>> getPolygons({int? floor}) async {
     try {
