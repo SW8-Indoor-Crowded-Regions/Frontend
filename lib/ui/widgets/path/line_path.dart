@@ -23,6 +23,10 @@ class LinePath extends StatelessWidget {
       return LatLng(coord.latitude, coord.longitude);
     }).toList();
 
+    if (points.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return PolylineLayer(
       polylines: [
         Polyline(

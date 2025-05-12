@@ -5,6 +5,10 @@ import 'package:latlong2/latlong.dart';
 enum WallRelation { opposite, perpendicular, same }
 
 List<DoorObject> beautifyPath(initPath) {
+  if (initPath.isEmpty) {
+    return [];
+  }
+
   List<DoorObject> path = [ initPath[0] ];
   for (int i = 0; i < initPath.length - 1; i++) {
     path.addAll(intermediatePoints(
