@@ -30,4 +30,28 @@ class GatewayService {
       return [];
     }
   }
+  
+  Future<List<DoorObject>> getFastestMultiRoomPath(
+      String source, List<String> roomNames) async {
+    try {
+      final String baseUrl = dotenv.env['BASE_URL'] ?? "http://localhost:8000";
+      Response response = await dio.post(
+        "$baseUrl/multi-point-path",
+        data: {
+          "source": source,
+          "targets": roomNames,
+        },
+      );
+
+      List<DoorObject> path =
+          (response.data['fastest_path'] as List)
+              .map((e) => DoorObject.fromJson(e))
+              .toList();
+
+      return path;
+    } catch (e) {
+      ErrorToast.show("Failed to fetch multi-room path");
+      return [];
+    }
+  }
 }
