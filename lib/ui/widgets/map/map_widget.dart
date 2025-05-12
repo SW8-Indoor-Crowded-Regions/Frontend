@@ -323,12 +323,19 @@ class _MapWidgetState extends State<MapWidget> {
         if (widget.pathData != null && widget.pathData!.isNotEmpty)
           if (widget.pathData != null)
             LinePath(
-              pathCoordinates: widget.pathData!
-                  .where((sensor) => sensor.rooms
-                      .any((room) => room.floor == widget.currentFloor))
-                  .toList(),
+              pathCoordinates: widget.pathData!,
+              currentFloor: widget.currentFloor,
             ),
         if (widget.userLocationWidget != null) widget.userLocationWidget!,
+
+        MarkerLayer(
+          markers: [
+            Marker(
+              point: const LatLng(55.68867310026443, 12.578501595248802),
+              child: Icon(Icons.location_pin, size: 28, color: Colors.red.withValues(alpha: 0.8)),
+            ),
+          ],
+        )
       ],
     );
   }

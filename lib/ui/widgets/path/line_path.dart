@@ -8,35 +8,62 @@ class LinePath extends StatelessWidget {
   final List<DoorObject> pathCoordinates;
   final Color lineColor;
   final double lineWidth;
+  final int currentFloor;
 
   const LinePath({
     super.key,
     required this.pathCoordinates,
+    required this.currentFloor,
     this.lineColor = Colors.blue,
     this.lineWidth = 4.0,
   });
 
   @override
   Widget build(BuildContext context) {
-    final List<DoorObject> beautifiedCoordinates = beautifyPath(pathCoordinates);
-    final List<LatLng> points = beautifiedCoordinates.map((coord) {
-      return LatLng(coord.latitude, coord.longitude);
-    }).toList();
-
-    if (points.isEmpty) {
+    if (pathCoordinates.isEmpty) {
       return const SizedBox.shrink();
     }
 
+    final List<List<DoorObject>> segmentedPaths =
+        _extractFloorPathSegments(pathCoordinates, currentFloor);
     return PolylineLayer(
-      polylines: [
-        Polyline(
-          points: points,
-          strokeWidth: lineWidth,
-          color: lineColor,
-          borderStrokeWidth: 3.0,
-          borderColor: Colors.black,
-        ),
-      ],
+      polylines: segmentedPaths.map((segment) {
+        final latLngs = beautifyPath(segment)
+            .map((door) => LatLng(door.latitude, door.longitude))
+            .toList();
+        return Polyline(
+          points: latLngs,
+          strokeWidth: 4.0,
+          color: Colors.blueAccent,
+        );
+      }).toList(),
     );
   }
+}
+
+List<List<DoorObject>> _extractFloorPathSegments(
+    List<DoorObject> fullPath, int currentFloor) {
+  List<List<DoorObject>> floorSegments = [];
+  List<DoorObject> currentSegment = [];
+
+  for (final point in fullPath) {
+    bool isOnCurrentFloor =
+        point.rooms.any((room) => room.floor == currentFloor);
+
+    if (isOnCurrentFloor) {
+      currentSegment.add(point);
+    } else {
+      if (currentSegment.length > 1) {
+        floorSegments.add(List.from(currentSegment));
+      }
+      currentSegment.clear();
+    }
+  }
+
+  // Add any remaining valid segment
+  if (currentSegment.length > 1) {
+    floorSegments.add(currentSegment);
+  }
+
+  return floorSegments;
 }

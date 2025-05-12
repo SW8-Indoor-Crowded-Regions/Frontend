@@ -192,6 +192,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _handleMapTap(TapPosition tapPosition, LatLng point) {
+    print("Tapped at: ${point.latitude}, ${point.longitude}");
     final floorPolygons = _polygons
         .where((p) => p.additionalData?['floor'] == _currentFloor)
         .toList();
