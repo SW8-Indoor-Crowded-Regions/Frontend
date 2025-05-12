@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart'; // Contains MapController, MapPosition, MapEvent classes
 import 'package:latlong2/latlong.dart';
@@ -59,6 +61,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   UserLocationWidget? userLocationWidget;
   double _currentZoom = 18.0;
   int _currentFloor = 1;
+  late Timer _refreshTimer;
 
   late Future<List<PolygonArea>> _polygonsFuture = Future.value([]);
   late List<PolygonArea> _polygons = [];
@@ -95,6 +98,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
     );
 
+    _refreshTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+      if (mounted) {
+        _loadPolygons(_currentFloor);
+      }
+    });
+
     if (widget.isTestMode) {
       _pulseAnimationController.value = 0.85;
     } else {
@@ -119,6 +128,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void dispose() {
     _pulseAnimationController.dispose();
     mapController.dispose();
+    _refreshTimer.cancel();
     super.dispose();
   }
 
@@ -355,6 +365,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       _currentFloor = floor;
     });
     _loadPolygons(floor);
+    _refreshTimer.cancel();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+      if (mounted) {
+        _loadPolygons(floor);
+      }
+    });
   }
 
   void _cancelSelection() {
