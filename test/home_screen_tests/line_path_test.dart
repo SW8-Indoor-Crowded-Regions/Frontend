@@ -21,7 +21,10 @@ class MockGatewayService extends Mock implements GatewayService {
 
 void main() {
   setUpAll(() async {
-    dotenv.dotenv.testLoad(mergeWith: {'BASE_URL': 'http://localhost:8000', 'FLUTTER_TEST': 'true'});
+    dotenv.dotenv.testLoad(mergeWith: {
+      'BASE_URL': 'http://localhost:8000',
+      'FLUTTER_TEST': 'true'
+    });
   });
 
   testWidgets('Finds a LinePath widget', (WidgetTester tester) async {
@@ -209,13 +212,13 @@ void main() {
 
     final colorsUsed = polylines.map((p) => p.color).toSet();
 
-    expect(colorsUsed, contains(Colors.blue));
+
+    expect(colorsUsed, contains(Colors.blueAccent));
   });
 }
 
 class HomeScreenTestWrapper extends StatelessWidget {
-  final Future<List<DoorObject>> Function(dynamic)?
-      loadGraphDataOverride;
+  final Future<List<DoorObject>> Function(dynamic)? loadGraphDataOverride;
   final bool skipUserLocation;
 
   const HomeScreenTestWrapper({

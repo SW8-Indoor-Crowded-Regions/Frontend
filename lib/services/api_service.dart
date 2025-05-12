@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:indoor_crowded_regions_frontend/utils/env.dart';
 import 'package:indoor_crowded_regions_frontend/ui/components/error_toast.dart';
 
 class APIService {
   final dio = Dio(BaseOptions(
-    baseUrl: dotenv.env['BASE_URL'] ?? "http://localhost:8000",
+    baseUrl: baseUrl
   ));
 
   Future<Response> searchArtwork(String query) async {

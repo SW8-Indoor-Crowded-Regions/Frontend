@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:indoor_crowded_regions_frontend/utils/env.dart';
 import 'package:indoor_crowded_regions_frontend/ui/components/error_toast.dart';
 import 'package:indoor_crowded_regions_frontend/ui/widgets/utils/types.dart';
 
@@ -9,7 +9,6 @@ class GatewayService {
   Future<List<DoorObject>> getFastestRouteWithCoordinates(
       String source, String target) async {
     try {
-      final String baseUrl = dotenv.env['BASE_URL'] ?? "http://localhost:8000";
       Response response = await dio.post(
         "$baseUrl/fastest-path",
         data: {
@@ -34,7 +33,6 @@ class GatewayService {
   Future<List<DoorObject>> getFastestMultiRoomPath(
       String source, List<String> roomNames) async {
     try {
-      final String baseUrl = dotenv.env['BASE_URL'] ?? "http://localhost:8000";
       Response response = await dio.post(
         "$baseUrl/multi-point-path",
         data: {
