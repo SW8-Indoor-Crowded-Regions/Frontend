@@ -62,9 +62,6 @@ class _MapWidgetState extends State<MapWidget> {
     final roomDensity = polygon.additionalData?['occupants'] /
         polygon.additionalData?['area'];
 
-    print('Room density: $roomDensity');
-    print('Occupants: ${polygon.additionalData?['occupants']}');
-
     if (roomDensity == null) {
       return Colors.white.withValues(alpha: _defaultAlpha);
     }
