@@ -8,9 +8,9 @@ import '../../widgets/path/line_path.dart';
 import '../../widgets/utils/types.dart';
 
 const double _defaultAlpha = 0.25;
-const double _greenLimit = 0.05;
-const double _yellowLimit = 0.1;
-const double _orangeLimit = 0.25;
+const double _greenLimit = 0.025;
+const double _yellowLimit = 0.05;
+const double _orangeLimit = 0.1;
 
 class MapWidget extends StatefulWidget {
   final MapController mapController;
@@ -148,6 +148,7 @@ class _MapWidgetState extends State<MapWidget> {
                   .map((polygon) {
                 return Polygon(
                   points: polygon.points, 
+
                   color: widget.isSelectingOnMap || (polygon.type == widget.highlightedCategory && typeCounts[polygon.type]! > 1)
                       ? Colors.blue.withValues(alpha: 0.15)
                       : _getPolygonColor(polygon),
