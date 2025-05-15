@@ -19,7 +19,7 @@ import '../../services/polygon_service.dart';
 import '../../models/polygon_area.dart';
 import '../widgets/utils/types.dart';
 
-const int POLYGON_REFRESH_INTERVAL = 5; // seconds
+const int polygonRefreshInterval = 5; // seconds
 
 class Room {
   final String? id;
@@ -100,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
     );
 
-    _refreshTimer = Timer.periodic(const Duration(seconds: POLYGON_REFRESH_INTERVAL), (timer) {
+    _refreshTimer = Timer.periodic(const Duration(seconds: polygonRefreshInterval), (timer) {
       if (mounted) {
         _loadPolygons(_currentFloor);
       }
@@ -368,7 +368,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     });
     _loadPolygons(floor);
     _refreshTimer.cancel();
-    _refreshTimer = Timer.periodic(const Duration(seconds: POLYGON_REFRESH_INTERVAL), (timer) {
+    _refreshTimer = Timer.periodic(const Duration(seconds: polygonRefreshInterval), (timer) {
       if (mounted) {
         _loadPolygons(floor);
       }
