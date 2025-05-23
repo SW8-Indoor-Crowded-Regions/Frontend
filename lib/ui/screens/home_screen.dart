@@ -67,7 +67,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   int _currentFloor = 1;
   late Timer _refreshTimer;
 
-  late List<PolygonArea> _polygons = [];
   PolygonArea? _selectedPolygon;
   bool _showInfoPanel = false;
 
@@ -145,7 +144,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void _loadPolygons(int floor) {
     polygonService.getPolygons(floor: floor).then((data) {
       if (mounted) {
-        print("Loaded ${data.length} polygons for floor $floor");
         _polygonNotifier.value = data; // notify listeners
       }
     }).catchError((error) {
@@ -423,7 +421,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               return ValueListenableBuilder(
                   valueListenable: _polygonNotifier,
                   builder: (context, polygons, _) {
-                    print("Building MapWidget with ${polygons.length} polygons");
                     return MapWidget(
                       mapController: mapController,
                       currentFloor: _currentFloor,
