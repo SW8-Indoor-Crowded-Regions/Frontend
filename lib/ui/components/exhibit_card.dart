@@ -138,6 +138,18 @@ class ExhibitCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4.0),
+                    child: Text(
+                      "Source: Statens Museums for Kunst, open.smk.dk",
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade400, // Lighter gray for visibility
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  )
+
               ],
             ),
           ),
