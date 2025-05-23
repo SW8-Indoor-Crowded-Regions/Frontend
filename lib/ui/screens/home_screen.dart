@@ -56,6 +56,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final APIService apiService = APIService();
   final PolygonService polygonService = PolygonService();
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  final ValueNotifier<List<PolygonArea>> _polygonNotifier =
+      ValueNotifier<List<PolygonArea>>([]);
   final GlobalKey<UserLocationWidgetState> userLocationKey =
       GlobalKey<UserLocationWidgetState>();
 
@@ -65,8 +67,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   int _currentFloor = 1;
   late Timer _refreshTimer;
 
-  late Future<List<PolygonArea>> _polygonsFuture = Future.value([]);
-  late List<PolygonArea> _polygons = [];
   PolygonArea? _selectedPolygon;
   bool _showInfoPanel = false;
 
@@ -100,7 +100,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
     );
 
-    _refreshTimer = Timer.periodic(const Duration(seconds: polygonRefreshInterval), (timer) {
+    _refreshTimer = Timer.periodic(
+        const Duration(seconds: polygonRefreshInterval), (timer) {
       if (mounted) {
         _loadPolygons(_currentFloor);
       }
@@ -131,6 +132,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _pulseAnimationController.dispose();
     mapController.dispose();
     _refreshTimer.cancel();
+    _polygonNotifier.dispose();
     super.dispose();
   }
 
@@ -140,27 +142,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _loadPolygons(int floor) {
-    setState(() {
-      _polygonsFuture = polygonService.getPolygons(floor: floor);
-      _selectedPolygon = null;
-      _showInfoPanel = false;
-    });
-
-    _polygonsFuture.then((data) {
+    polygonService.getPolygons(floor: floor).then((data) {
       if (mounted) {
-        setState(() {
-          _polygons = data;
-        });
+        _polygonNotifier.value = data; // notify listeners
       }
     }).catchError((error) {
       if (mounted) {
-        setState(() {
-          _polygons = [];
-        });
+        _polygonNotifier.value = []; // notify with empty list
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error loading map data for floor $floor.'),
-            backgroundColor: Colors.red.shade700, // Darker red for dark mode
+            backgroundColor: Colors.red.shade700,
           ),
         );
       }
@@ -204,9 +196,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _handleMapTap(TapPosition tapPosition, LatLng point) {
-    final floorPolygons = _polygons
-        .where((p) => p.additionalData?['floor'] == _currentFloor)
-        .toList();
+    final floorPolygons = _polygonNotifier.value
+    .where((p) => p.additionalData?['floor'] == _currentFloor)
+    .toList();
 
     PolygonArea? tappedPolygon;
     for (var polygon in floorPolygons) {
@@ -368,7 +360,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     });
     _loadPolygons(floor);
     _refreshTimer.cancel();
-    _refreshTimer = Timer.periodic(const Duration(seconds: polygonRefreshInterval), (timer) {
+    _refreshTimer = Timer.periodic(
+        const Duration(seconds: polygonRefreshInterval), (timer) {
       if (mounted) {
         _loadPolygons(floor);
       }
@@ -425,25 +418,29 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           FutureBuilder<List<DoorObject>>(
             future: _edgesFuture,
             builder: (context, snapshot) {
-              return MapWidget(
-                mapController: mapController,
-                currentFloor: _currentFloor,
-                polygons: _polygons,
-                selectedPolygon: _selectedPolygon,
-                pulseAnimation: _pulseAnimation,
-                isSelectingOnMap: isSelectingOnMap,
-                onTap: _handleMapTap,
-                pathData: snapshot.hasData && snapshot.data!.isNotEmpty
-                    ? snapshot.data
-                    : null,
-                userLocationWidget: userLocationWidget,
-                onMapEvent: _handleMapEvent,
-                onPositionChanged: _handlePositionChanged,
-                fromRoom: _fromRoom,
-                toRoom: _toRoom,
-                highlightedCategory: highlightedCategory,
-                simulateMapTap: simulateMapTap,
-              );
+              return ValueListenableBuilder(
+                  valueListenable: _polygonNotifier,
+                  builder: (context, polygons, _) {
+                    return MapWidget(
+                      mapController: mapController,
+                      currentFloor: _currentFloor,
+                      polygons: polygons,
+                      selectedPolygon: _selectedPolygon,
+                      pulseAnimation: _pulseAnimation,
+                      isSelectingOnMap: isSelectingOnMap,
+                      onTap: _handleMapTap,
+                      pathData: snapshot.hasData && snapshot.data!.isNotEmpty
+                          ? snapshot.data
+                          : null,
+                      userLocationWidget: userLocationWidget,
+                      onMapEvent: _handleMapEvent,
+                      onPositionChanged: _handlePositionChanged,
+                      fromRoom: _fromRoom,
+                      toRoom: _toRoom,
+                      highlightedCategory: highlightedCategory,
+                      simulateMapTap: simulateMapTap,
+                    );
+                  });
             },
           ),
           Positioned(

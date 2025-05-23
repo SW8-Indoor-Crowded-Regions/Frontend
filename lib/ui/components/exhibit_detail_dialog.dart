@@ -78,6 +78,9 @@ class ExhibitDetailDialog extends StatelessWidget {
                         ColorSection(label: "Colors", colors: colors),
                       if (description.isNotEmpty && description != "Unknown")
                         _buildDescriptionSection(description),
+                      const ExhibitDetailRow(
+                          label: "Source",
+                          value: "Statens Museums for Kunst, open.smk.dk"),
                       if (frontendUrl != null) _buildLinkButton(frontendUrl),
                     ],
                   ),
