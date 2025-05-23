@@ -44,7 +44,7 @@ class ExhibitCard extends StatelessWidget {
         children: [
           // Image section
           SizedBox(
-            height: cardHeight * 0.6, // 60% of card height for image
+            height: cardHeight * 0.4, // 60% of card height for image
             width: double.infinity,
             child: thumbnail != null && thumbnail.isNotEmpty
                 ? Stack(
