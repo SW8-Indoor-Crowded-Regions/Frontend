@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart'; // Contains MapController, MapPosition, MapEvent classes
 import 'package:latlong2/latlong.dart';
@@ -16,6 +18,8 @@ import '../../services/gateway_service.dart';
 import '../../services/polygon_service.dart';
 import '../../models/polygon_area.dart';
 import '../widgets/utils/types.dart';
+
+const int polygonRefreshInterval = 5; // seconds
 
 class Room {
   final String? id;
@@ -59,6 +63,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   UserLocationWidget? userLocationWidget;
   double _currentZoom = 18.0;
   int _currentFloor = 1;
+  late Timer _refreshTimer;
 
   late Future<List<PolygonArea>> _polygonsFuture = Future.value([]);
   late List<PolygonArea> _polygons = [];
@@ -95,6 +100,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
     );
 
+    _refreshTimer = Timer.periodic(const Duration(seconds: polygonRefreshInterval), (timer) {
+      if (mounted) {
+        _loadPolygons(_currentFloor);
+      }
+    });
+
     if (widget.isTestMode) {
       _pulseAnimationController.value = 0.85;
     } else {
@@ -119,6 +130,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void dispose() {
     _pulseAnimationController.dispose();
     mapController.dispose();
+    _refreshTimer.cancel();
     super.dispose();
   }
 
@@ -169,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       _selectedPolygon = null;
       _showInfoPanel = false;
     });
-    
+
     Navigator.pop(context);
   }
 
@@ -355,6 +367,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       _currentFloor = floor;
     });
     _loadPolygons(floor);
+    _refreshTimer.cancel();
+    _refreshTimer = Timer.periodic(const Duration(seconds: polygonRefreshInterval), (timer) {
+      if (mounted) {
+        _loadPolygons(floor);
+      }
+    });
   }
 
   void _cancelSelection() {
@@ -388,7 +406,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Scaffold(
       key: scaffoldKey,
       backgroundColor: const Color(0xFF121212), // Dark background for scaffold
-      drawer: BurgerDrawer(highlightedCategory: highlightRooms),
+      drawer: BurgerDrawer(
+        highlightedCategory: highlightRooms,
+        setPath: (path) => {
+          setState(() {
+            _edgesFuture = path;
+            _showTopBar = false;
+            _selectingFromRoom = false;
+            _selectingToRoom = false;
+            _fromRoom = null;
+            _toRoom = null;
+            _selectedPolygon = null;
+          })
+        },
+      ),
       body: Stack(
         children: [
           FutureBuilder<List<DoorObject>>(

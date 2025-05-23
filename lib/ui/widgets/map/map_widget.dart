@@ -7,6 +7,11 @@ import '../../screens/home_screen.dart';
 import '../../widgets/path/line_path.dart';
 import '../../widgets/utils/types.dart';
 
+const double _defaultAlpha = 0.25;
+const double _greenLimit = 0.025;
+const double _yellowLimit = 0.05;
+const double _orangeLimit = 0.1;
+
 class MapWidget extends StatefulWidget {
   final MapController mapController;
   final int currentFloor;
@@ -52,6 +57,26 @@ class _MapWidgetState extends State<MapWidget> {
   static const double _labelVisibilityThreshold =
       19.0; // Show labels only when zoomed in more
   double _mapRotation = 0.0; // Track map rotation
+
+  Color _getPolygonColor(PolygonArea polygon) {
+    final roomDensity = polygon.additionalData?['occupants'] /
+        polygon.additionalData?['area'];
+
+    if (roomDensity == null) {
+      return Colors.white.withValues(alpha: _defaultAlpha);
+    }
+
+    if (roomDensity < _greenLimit) {
+      return Colors.green.withValues(alpha: _defaultAlpha);
+    } else if (roomDensity < _yellowLimit) {
+      return Colors.yellow.withValues(alpha: _defaultAlpha);
+    } else if (roomDensity < _orangeLimit) {
+      return Colors.orange.withValues(alpha: _defaultAlpha);
+    } else {
+      return Colors.red.withValues(alpha: _defaultAlpha);
+    }
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -123,12 +148,13 @@ class _MapWidgetState extends State<MapWidget> {
                   .map((polygon) {
                 return Polygon(
                   points: polygon.points, 
+
                   color: widget.isSelectingOnMap || (polygon.type == widget.highlightedCategory && typeCounts[polygon.type]! > 1)
                       ? Colors.blue.withValues(alpha: 0.15)
-                      : Colors.white.withValues(alpha: 0.15),
+                      : _getPolygonColor(polygon),
                   borderColor: widget.isSelectingOnMap || (polygon.type == widget.highlightedCategory && typeCounts[polygon.type]! > 1)
                       ? Colors.blueAccent.withValues(alpha: 0.8)
-                      : Colors.white.withValues(alpha: 0.6),
+                      : _getPolygonColor(polygon).withValues(alpha: 0.6),
                   borderStrokeWidth: widget.isSelectingOnMap || (polygon.type == widget.highlightedCategory && typeCounts[polygon.type]! > 1) ? 2.0 : 1.0,
                 );
               }).toList(),
@@ -298,10 +324,8 @@ class _MapWidgetState extends State<MapWidget> {
         if (widget.pathData != null && widget.pathData!.isNotEmpty)
           if (widget.pathData != null)
             LinePath(
-              pathCoordinates: widget.pathData!
-                  .where((sensor) => sensor.rooms
-                      .any((room) => room.floor == widget.currentFloor))
-                  .toList(),
+              pathCoordinates: widget.pathData!,
+              currentFloor: widget.currentFloor,
             ),
         if (widget.userLocationWidget != null) widget.userLocationWidget!,
       ],
